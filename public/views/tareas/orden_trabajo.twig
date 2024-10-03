@@ -1,0 +1,192 @@
+{% extends 'layout.twig' %}
+
+{% block header %}
+{{ parent() }}
+<link rel="stylesheet" href="http://localhost/css/odt.css">
+
+{% endblock %}
+
+{% block contenido %}
+<main class="mainOdt">
+    <h1>Orden de trabajo</h1>
+    <div class="tablero">
+        <div class="col-tablero" data-idcolumna="pediente">
+            <div class="nom-col">
+                <h3>Pendientes</h3>
+            </div>
+            <div class="contenido-col-pendientes">
+
+            </div>
+        </div>
+        <div class="col-tablero" data-idcolumna="proceso">
+            <div class="nom-col">
+                <h3>Proceso</h3>
+            </div>
+            <div class="contenido-col-proceso">
+
+            </div>
+        </div>
+        <div class="col-tablero" data-idcolumna="revision">
+            <div class="nom-col">
+                <h3>Revision</h3>
+            </div>
+            <div class="contenido-col-revision">
+
+            </div>
+        </div>
+        <div class="col-tablero" data-idcolumna="finalizado">
+            <div class="nom-col">
+                <h3>Finalizadas</h3>
+            </div>
+            <div class="contenido-col-finalizado">
+
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+
+{% block footer %}
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        let idUnDecoded = "{{ session['login']['idusuario'] }}" // ME QUEDE ACAAAAAAAAAAAA
+        const idusuario = idUnDecoded.toLowerCase()
+        let rolUnDecoded = "{{ session['login']['rol'] }}";
+        const rol = rolUnDecoded.toLowerCase();
+        console.log("idusuario:", idusuario)
+        function $(object = null) {
+            return document.querySelector(object);
+        }
+
+        const droppables = document.querySelectorAll(".col-tablero");
+
+        // Evento de arrastrar
+        function addDragEvents(tarea) {
+            // Cuando empieza a arrastrar
+            tarea.addEventListener("dragstart", (e) => {
+                tarea.classList.add("arrastrando");
+                e.dataTransfer.setData("text", tarea.getAttribute("data-idtarea")); // Almacenar el data-idtarea del elemento arrastrado
+
+            });
+
+            // Cuando termina de arrastrar
+            tarea.addEventListener("dragend", () => {
+                tarea.classList.remove("arrastrando");
+            });
+        }
+
+        // Evento de click (solo ejemplo)
+        function addClickEvent(tarea) {
+            tarea.addEventListener("click", () => {
+                const tareaid = tarea.getAttribute("data-idtarea");
+                console.log(tareaid);
+            });
+        }
+
+        // Configurar las columnas para permitir soltar las tareas
+        droppables.forEach((zona) => {
+            // Permitir que el elemento se suelte
+            zona.addEventListener("dragover", (e) => {
+                e.preventDefault();
+            });
+
+            // Soltar el elemento en la nueva columna
+            zona.addEventListener("drop", async (e) => {
+                e.preventDefault();
+                const idTarea = e.dataTransfer.getData("text");
+                console.log("IDTAREA:", idTarea)
+                const tareaArrastrada = document.querySelector(`[data-idtarea='${idTarea}']`);
+                if (tareaArrastrada) {
+                    const columnaDestino = zona.querySelector('.contenido-col-' + zona.getAttribute('data-idcolumna'));
+                    columnaDestino.appendChild(tareaArrastrada);
+                    const idcolumna = zona.getAttribute("data-idcolumna");
+                    if (idcolumna === "proceso") {
+                        console.log("la tarea esta ne la columan prodceso")
+                        const idOdt = await registrarOdt(idTarea)
+                        console.log(idOdt[0].id)
+                        window.localStorage.setItem("idodt", idOdt[0].id)
+                        window.location.href = `/usuario/tareas/odt/registrar`
+                    }
+                }
+            });
+        });
+
+        async function registrarOdt(idtarea) {
+            const formOdt = new FormData()
+            formOdt.append("idtarea", idtarea)
+            formOdt.append("creado_por", idusuario)
+            const dataOdt = await fetch(`/${rol}/tareas/odt/registrar`, { method: 'POST', body: formOdt })
+            const idodt = dataOdt.json()
+            return idodt
+        }
+
+        
+        async function renderTareaCard(tareaData) {
+            const tarea = document.createElement("div");
+            tarea.classList.add("tarea"); ME QUEDE ACAAAAAAAAAAAAAA
+            tarea.setAttribute("draggable", "true");
+            tarea.setAttribute("data-idtarea", tareaData.idtarea); // Usar data-idtarea
+
+            // Convertir las fechas a formato solo de fecha
+            const fechaInicio = new Date(tareaData.fecha_inicio).toLocaleDateString();
+            const fechaVencimiento = new Date(tareaData.fecha_vencimiento).toLocaleDateString();
+
+            tarea.innerHTML = `
+                <h3>${tareaData.descripcion}</h3>
+                <div class="fechas-tarea">
+                    <p>Inicia: ${fechaInicio}</p>
+                    <p>Vence: ${fechaVencimiento}</p>
+                </div>
+                <p>${tareaData.plantarea}</p>
+                <p>${tareaData.activo}</p>
+                <div>
+                    <span class="prioridad-${tareaData.prioridad}"></span>
+                    <p>${tareaData.prioridad}</p>
+                </div>
+            `;
+            
+            console.log(tarea)
+            return tarea;
+
+        }
+
+        // Renderizar las tareas en la columna "Pendientes"
+        async function renderKanban() {
+            const fdata = await fetch(`/transparenciawsrest/consulta/tareasodt/data`, { method: 'GET' });
+            const data = await fdata.json();
+
+            console.log("tareas agregadas al kabnban: ", data)
+            const tpendientes = $(".contenido-col-pendientes");
+            //const tproceso = $(".")
+
+            for (let i = 0; i < data.length; i++) {
+                const tareaCard = await renderTareaCard(data[i])
+
+                switch (data[i].estado) {
+                    case 'pendiente':
+                        // Agregar los eventos de arrastre y click
+                        addDragEvents(await tareaCard);
+                        addClickEvent(await tareaCard);
+
+                        // Agregar la tarea a la columna "Pendientes"
+                        tpendientes.appendChild(await tareaCard);
+                        break;
+
+                    case 'proceso':
+                        const tareaCardProceso = await renderTareaCard(data[i])
+                        addDragEvents(await tareaCard);
+                        addClickEvent(await tareaCard);
+                        break;
+                }
+            }
+        }
+
+        await renderKanban();
+    });
+
+
+</script>
+
+
+{% endblock %}

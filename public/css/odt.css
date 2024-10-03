@@ -1,0 +1,136 @@
+/* Estructura principal */
+.mainOdt {
+    margin: 50px;
+    width: 100%;
+    overflow-x: auto;
+    -ms-overflow-style: none;  /* Para Internet Explorer y Edge */
+    scrollbar-width: none;     /* Para Firefox */
+    margin-left: calc(256px + 30px);  /* Ajuste para un sidebar fijo de 256px */
+}
+
+/* Ocultar scrollbar en navegadores Webkit (Chrome, Safari) */
+*::-webkit-scrollbar {
+    display: none;
+}
+
+/* Tablero de Kanban */
+.tablero {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;  /* Espaciado entre columnas */
+    padding: 20px 0;  /* Espaciado superior e inferior */
+    overflow-x: auto; /* Permitir el desplazamiento horizontal */
+}
+
+/* Columnas del tablero */
+.col-tablero {
+    background-color: white;
+    width: 300px;
+    flex-shrink: 0;
+    margin: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;  /* Alinear contenido en columna */
+    gap: 10px;
+}
+
+.nom-col {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    color: #333; /* Color de texto oscuro */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+}
+
+/* Tarjetas de tareas */
+.tarea {
+    background-color: white;
+    color: black;
+    padding: 15px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: move;
+    box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.75);
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease;
+}
+
+.tarea:hover {
+    transform: scale(1.03);  /* Agrandar ligeramente al pasar el mouse */
+}
+
+/* Cuando se está arrastrando la tarea */
+.arrastrando {
+    transform: scale(1.05);
+    background-color: black;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Fechas de las tareas */
+.tarea .fechas-tarea {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Estilo para la prioridad de la tarea */
+
+/* Colores personalizados según prioridad */
+.prioridad-urgente {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background-color: #ff0000; /* Ejemplo de color para la prioridad */
+}
+
+.prioridad-alta {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background-color: #fbff00; /* Ejemplo de color para la prioridad */
+}
+
+.prioridad-media {
+    background-color: #0026ff;  /* Amarillo para prioridad media */
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.prioridad-baja {
+    background-color: #40ff00;  /* Verde para baja prioridad */
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+/* Estilos adicionales para diferentes estados */
+.contenido-col-pendientes .tarea {
+    border-left: 5px solid #ffeb3b;  /* Amarillo para pendientes */
+}
+
+.contenido-col-proceso .tarea {
+    border-left: 5px solid #03a9f4;  /* Azul para en proceso */
+}
+
+.contenido-col-revision .tarea {
+    border-left: 5px solid #ff9800;  /* Naranja para revisión */
+}
+
+.contenido-col-finalizado .tarea {
+    border-left: 5px solid #4caf50;  /* Verde para finalizadas */
+}

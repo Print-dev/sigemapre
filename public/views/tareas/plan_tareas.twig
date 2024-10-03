@@ -1,0 +1,105 @@
+{% extends  'layout.twig' %}
+
+{% block header %}
+  {{ parent() }}
+    <link rel="stylesheet" href="http://localhost/css/plantareas.css">
+{% endblock %}
+
+{% block contenido %}
+<main class="mainPlanTareas">
+    <h1>PLAN DE TAREAS</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Descripcion</th>
+                <th>Tareas totales</th>
+                <th>Activos vinculados</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="plantareasBody">
+        </tbody>
+    </table>
+
+    <button id="btnInterfazNuevoPlanTarea">Nuevo</button>
+
+</main>
+{% endblock %}
+
+{% block footer %}
+    {{ parent() }}  {# Incluye el contenido del bloque 'footer' del layout base #}
+
+    <script>
+        let rolUnDecoded = '{{ session['login']['rol'] }}'
+        const rol = rolUnDecoded.toLowerCase()       
+        document.addEventListener("DOMContentLoaded", async () => {
+            const { data } = await axios.get('/transparenciawsrest/consulta/plantareas/data')
+            console.log(data) // ME QUEDE ACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            for (let i = 0; i < data.length; i++) {
+                const tbodyPlanTareas = document.querySelector("#plantareasBody")
+                tbodyPlanTareas.innerHTML += `
+                    <tr>
+                        <th>${data[i].idplantarea}</th>
+                        <td>${data[i].descripcion}</td>
+                        <td>${data[i].tareas_totales}</td>
+                        <td>${data[i].activos_vinculados}</td>
+                        <td>
+                            <button class="btnEditarPlanTarea" data-plan-id="${data[i].idplantarea}">Editar</button>
+                            <button data-plan-id="${data[i].idplantarea}" class="btnEliminarPlan">Eliminar</button>
+                            <span id="estado-plan">${(data[i].borrador == 1) ? 'borrador' : ''}</span>
+                        </td>
+                    </tr>
+                `
+            }
+
+            document.querySelectorAll(".btnEditarPlanTarea").forEach((btnPlan) => {
+                btnPlan.addEventListener("click", async (e) => {
+                    window.location.href = '/' + rol + '/tareas/plantareas/' + btnPlan.getAttribute("data-plan-id")
+                    window.localStorage.clear()
+                    window.localStorage.setItem("idplantarea", btnPlan.getAttribute("data-plan-id"))
+                })
+            })
+
+            document.querySelectorAll(".btnEliminarPlan").forEach((btnPlan) => {
+                btnPlan.addEventListener("click", async (e) => {
+                    const idPlan = btnPlan.getAttribute('data-plan-id');
+                    const confirmacion = confirm(`¿Estás seguro de que deseas eliminar el plan de tareas con ID ${idPlan}?`);
+
+                    if (confirmacion) {
+                        try {
+                            // Hacer solicitud DELETE al servidor
+                            const response = await axios.delete('/' + rol + `/tareas/plantareas/plantarea/${idPlan}`);
+                            console.log(`Plan de tareas ${idPlan} eliminado exitosamente.`);
+
+                            // Eliminar la fila correspondiente en el DOM
+                            const filaPlan = e.target.closest('tr');
+                            if (filaPlan) {
+                                filaPlan.remove();
+                            } else {
+                                console.warn(`No se encontró la fila correspondiente al plan de tareas con ID ${idPlan}`);
+                            }
+
+                        } catch (error) {
+                            console.error(`Error al eliminar el plan de tareas ${idPlan}: `, error);
+                        }
+                    }
+                });
+            });
+
+
+        })
+
+
+
+        const btnInterfazNuevoPlanTarea = document.querySelector("#btnInterfazNuevoPlanTarea");
+        btnInterfazNuevoPlanTarea.addEventListener('click', () => {
+            window.location.href = '/' + rol + '/tareas/plantareas/registrar'
+        })
+
+
+    </script>
+
+{% endblock %}
+

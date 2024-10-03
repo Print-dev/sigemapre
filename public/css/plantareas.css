@@ -1,0 +1,71 @@
+.mainPlanTareas{
+    margin: 25px;
+    margin-left: calc(256px + 30px);
+}
+
+
+.mainPlanTareas{
+    width: 100%; /* Asegura que el contenedor ocupe todo el ancho */
+    overflow-x: auto; /* Agrega desplazamiento horizontal si es necesario */
+}
+
+/* Estilo general para la tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 18px;
+    font-family: 'Outfit', sans-serif; /* Fuente de Google */
+    text-align: left;
+    table-layout: auto; /* Ajusta automáticamente el ancho de las columnas */
+  }
+  
+  /* Estilo para los encabezados de la tabla */
+  thead th {
+    background-color: #4CAF50; /* Color de fondo */
+    color: white; /* Color del texto */
+    padding: 12px 15px;
+  }
+  
+  /* Estilo para las filas de la tabla */
+  tbody tr {
+    border-bottom: 1px solid #dddddd;
+  }
+  
+  tbody tr th{
+    padding-left: 21px;
+  }
+  /* Estilo para las celdas de la tabla */
+  tbody td {
+    padding: 12px 15px;
+  }
+  
+  /* Estilo alterno para las filas */
+  tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+  }
+  
+  /* Estilo para hover sobre las filas */
+  tbody tr:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+  }
+  
+  /* Estilo para las acciones, botones en la tabla */
+  button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+
+  #estado-plan{
+    color: red;
+    margin-left: 10px;
+  }

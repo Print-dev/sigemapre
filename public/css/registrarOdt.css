@@ -1,0 +1,206 @@
+.mainRegOdt {
+    margin: 30px;
+    width: 100%;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    margin-left: calc(256px + 30px);
+}
+
+.contenedor-general {
+    display: flex;
+    justify-content: space-between; /* Asegura que los contenedores tengan espacio entre ellos */
+    flex-wrap: wrap;
+}
+
+.contenedor-diagnostico-evidencia,
+.contenedor-tarea,
+.contenedor-responsables {
+    display: flex;
+    flex-direction: column;
+    width: 30%; /* Ajusta este valor según tus necesidades */
+    flex-shrink: 0; /* Evita que el contenedor se encoja */
+    margin: 10px; /* Espaciado entre contenedores */
+    background-color: white; /* Color de fondo opcional */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra opcional para destacar */
+    padding: 15px; /* Espaciado interno */
+    border-radius: 8px; /* Esquinas redondeadas opcionales */
+}
+
+.contenedor-tarea p{
+    color: #858585;
+}
+
+/* Media Queries para pantallas más pequeñas */
+@media (max-width: 768px) {
+    .contenedor-general {
+        justify-content: center; /* Centra los contenedores en pantallas pequeñas */
+    }
+
+    .contenedor-diagnostico-evidencia,
+    .contenedor-tarea,
+    .contenedor-responsables {
+        width: 90%;
+        margin: 10px 0; /* Margen vertical para separación */
+    }
+}
+
+@media (max-width: 900px) {
+    .contenedor-general {
+        justify-content: center; /* Centra los contenedores en pantallas pequeñas */
+    }
+
+    .contenedor-diagnostico-evidencia,
+    .contenedor-tarea,
+    .contenedor-responsables {
+        width: 90%;
+        margin: 10px 0; /* Margen vertical para separación */
+    }
+}
+
+/* CAJA DE DIAGNOSTICO */
+.contenedor-diagnostico-entrada {
+    width: 100%;
+    max-width: 1100px; /* Anchura máxima de la caja */
+    margin: 30px auto; /* Centrar la caja */
+    margin-bottom: auto;
+    border-radius: 10px; /* Esquinas redondeadas */
+}
+
+.contenedor-diagnostico-entrada h3 {
+    margin-bottom: 18px;
+    font-size: 20px;
+    color: #000000;
+
+}
+
+.comment-textarea {
+    width: 100%;
+    height: 200px; /* Ajusta la altura del textarea */
+    padding: 15px;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    font-size: 16px;
+    resize: none; /* Evita que el usuario cambie el tamaño */
+    margin-bottom: 20px;
+    background-color: #fff;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra interna para profundidad */
+    color: #333;
+    font-family: Arial, sans-serif;
+}
+
+.comment-textarea:focus {
+    outline: none; /* Quitar el borde por defecto al enfocar */
+    border-color: #007BFF; /* Color de borde al hacer foco */
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); /* Efecto de brillo al enfocar */
+}
+
+/* CONTENEDOR ASINGAR RESPONSABLES */
+
+/* Estilo para el título */
+.contenedor-responsables h2 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #333; /* Color del texto */
+    font-weight: bold;
+}
+
+/* Estilo para el botón Asignar Responsable */
+#btnAsignarResponsable {
+    padding: 12px 20px;
+    background-color: #007BFF; /* Fondo azul */
+    color: white; /* Texto blanco */
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px;
+    display: block;
+    width: 100%; /* Ancho completo del botón */
+}
+
+/* Efecto hover para el botón */
+#btnAsignarResponsable:hover {
+    background-color: #0056b3; /* Color de fondo al pasar el mouse */
+}
+
+/* Estilo para el contenedor de la lista */
+.contenedor-responsables-asignados {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    height: 600px; /* Limitar la altura */
+    overflow-y: auto; /* Scroll vertical si hay muchos elementos */
+    text-align: left; /* Alinear el texto a la izquierda */
+}
+
+/* Eliminar márgenes y padding de la lista */
+.contenedor-responsables-asignados ul {
+    list-style-type: none; /* Eliminar puntos de la lista */
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilo para cada elemento de la lista */
+.contenedor-responsables-asignados ul li {
+    padding: 10px;
+    margin-bottom: 5px;
+    font-size: 16px;
+    border: 1px solid #ddd; /* Borde alrededor de cada ítem */
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+/* Cambiar el fondo al pasar el mouse por cada elemento */
+.contenedor-responsables-asignados ul li:hover {
+    background-color: #f0f0f0;
+}
+
+
+/* ESTILOS PARA LA TAREA HEREDAD **************************************** */
+
+h2 {
+    margin-bottom: 10px;
+}
+
+.contenedor-detalles-tarea {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.contenedor-recursos-tarea {
+    max-height: 250px; /* Altura máxima para la lista */
+    overflow-y: auto; /* Habilita el scroll vertical */
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    display: block;
+}
+
+.contenedor-recursos-tarea ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.contenedor-recursos-tarea ul li {
+    padding: 5px;
+    background-color: #fff;
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.contenedor-comentario {
+    margin-top: auto;
+}
+
+.contenedor-comentario p {
+    font-size: 0.9em;
+    color: #333;
+}

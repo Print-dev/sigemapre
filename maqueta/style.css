@@ -1,0 +1,138 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Outfit", sans-serif;
+}
+
+body{
+  background-color: rgb(255, 255, 255);
+}
+
+.container{
+  width: 100%;
+  min-height: 100vh;
+}
+
+.sidebar{
+  width: 256px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgb(77,52,168);background: linear-gradient(180deg, rgba(77,52,168,1) 0%, rgba(58,98,255,1) 100%);
+  padding: 24px;
+}
+
+.sidebar .head{
+  display: flex;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #960b0b00;
+}
+
+
+.sidebar .foot{
+  display: flex;
+  gap: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #960b0b00;
+  margin-top: auto;
+}
+
+.user-img{
+  background-color: rgb(255, 255, 255);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.user-img img{
+  width: 100%;
+  object-fit: cover;
+}
+
+.user-details .title,
+.menu .title{
+  font-size: 18px;
+  font-weight: bold;
+  color: rgb(255, 255, 255);
+}
+
+.user-details .name{
+  color: aliceblue;
+  font-weight: lighter;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.menu ul li{
+  list-style: none;
+  margin-bottom: 5px;
+}
+
+.menu ul li a{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: rgb(255, 255, 255);
+  text-decoration: none;
+  padding: 12px 8px;
+  border-radius: 8px;
+  transition: all 0.1s;
+}
+
+.menu ul li a:hover{
+  color: black;
+  background-color: #f6f6f6;
+}
+
+.menu ul li .icon{
+  font-size: 20px;
+}
+
+.menu ul li .text{
+  flex: 1;
+}
+
+.menu ul li .arrow{
+  font-size: 14px;
+}
+
+.menu .sub-menu-tareas{
+  margin-left: 20px;
+  padding-left: 20px;
+  padding-top: 5px;
+  border-left: 1px solid #f6f6f6f6;
+}
+
+.menu .sub-menu-activos{
+  margin-left: 20px;
+  padding-left: 20px;
+  padding-top: 5px;
+  border-left: 1px solid #f6f6f6f6;
+}
+
+.menu .sub-menu-usuarios{
+  margin-left: 20px;
+  padding-left: 20px;
+  padding-top: 5px;
+  border-left: 1px solid #f6f6f6f6;
+}
+
+.head .icon{
+  color: white;
+  font-size: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.head p{
+  font-size: 28px;
+  font-weight: bold;
+  color: white;
+}

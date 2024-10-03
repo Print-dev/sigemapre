@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Models;
+
+use App\Config\Conexion;
+
+require_once __DIR__ . '/../config/Conexion.php';
+
+/**Clase para preparar la consulta (No hay necesidad de crear un Constructor en clases heredadas) */
+class ExecQuery extends Conexion{
+  private $pdo;
+
+  public function __CONSTRUCT(){
+    $this->pdo=parent::getConexion();
+  }
+
+  public function execQ($query):\PDOStatement{
+    return $this->pdo->prepare($query);
+  }
+}

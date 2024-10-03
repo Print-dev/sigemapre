@@ -1,0 +1,109 @@
+{% extends 'layout.twig' %}
+
+{% block header %}
+{{ parent() }}
+<link rel="stylesheet" href="http://localhost/css/registrarOdt.css">
+
+{% endblock %}
+
+{% block contenido %}
+<main class="mainRegOdt">
+    <div class="contenedor-general">
+        <div class="contenedor-diagnostico-evidencia">
+            <div class="contenedor-evidencias">
+                <img width="100%" src="http://localhost/img/camaraicon.jpg" alt="">
+            </div>
+            <div class="contenedor-diagnostico-entrada">
+                <h2>Dianostico de Entrada</h2>
+                <textarea class="comment-textarea" placeholder="Escribe tu comentario aquí..."></textarea>
+            </div>
+        </div>
+        <div class="contenedor-tarea">
+
+        </div>
+        <div class="contenedor-responsables">
+            <h2>Asignar Responsables</h2>
+            <button id="btnAsignarResponsable">Asignar Responsable</button>
+            <div class="contenedor-responsables-asignados">
+                <ul>
+                    <li>Responsable 1</li>
+                    <li>Responsable 1</li>
+                    <li>Responsable 1</li>
+                    <li>Responsable 1</li>
+
+
+                </ul>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block footer %}
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        function $(object = null) {
+            return document.querySelector(object);
+        }
+
+        await loadUI()
+
+        async function loadUI() {
+            await renderTareaOdt(window.localStorage.getItem("idodt"))
+        }
+
+        //ESTO OBTENDRA LA TAREA CUANDO SE REGISTRA UNA NUEVA ODT
+        async function obtenerTareaOdt(idodt) {
+            const dataTareaOdt = await fetch(`/transparenciawsrest/consulta/tareaodt/${idodt}`)
+            const tareaOdt = dataTareaOdt.json()
+            return tareaOdt
+        }
+
+        async function obtenerRecursosPorTarea(idtarea) {
+            const dataRecursosTareaOdt = await fetch(`/transparenciawsrest/consulta/recursos/tarea/${idtarea}`)
+            const recursosTareaOdt = dataRecursosTareaOdt.json()
+            return recursosTareaOdt
+        }
+
+        async function renderTareaOdt(idodt) {
+            const tareaOdt = await obtenerTareaOdt(idodt);
+            console.log("tareaOdt", tareaOdt);
+            const contenedorTarea = $(".contenedor-tarea");
+
+            tareaOdt.forEach(async (tarea) => {
+                const recursosTareaOdt = await obtenerRecursosPorTarea(tarea.idtarea);
+                console.log("recursosTareaOdt", recursosTareaOdt);
+
+                // Crear la lista de recursos en formato <li>
+                let recursosHTML = '';
+                recursosTareaOdt.forEach(recurso => {
+                    recursosHTML += `<li>${recurso.nombre}</li>`;
+                });
+
+                // Renderizar la tarea junto con los recursos
+                contenedorTarea.innerHTML += `
+                    <p>${tarea.plantarea}</p>
+                    <h2>${tarea.tarea}</h2>
+                    <div class="contenedor-detalles-tarea">
+                        <p>Activo: ${tarea.activo}</p>
+                        <p>Duración: ${tarea.duracion}</p>
+                    </div>       
+                    <hr>
+                    <br>
+                    <h2>Recursos</h2>  
+                    <div class="contenedor-recursos-tarea">
+                        <ul>
+                            ${recursosHTML}
+                        </ul> 
+                    </div>  
+                    <div class="contenedor-comentario">
+                        <h2>Comentario (opcional)</h2>
+                        <textarea class="comment-textarea" placeholder="Escribe tu comentario aquí..."></textarea>
+                    </div>                     
+                `;
+            });
+        }
+
+    })
+</script>
+{% endblock %}
