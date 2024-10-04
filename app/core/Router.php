@@ -113,6 +113,8 @@ $app->group('/usuario', function ($group) {
   $group->post('/tareas/plantareas/plantarea/registrar', [PlandetareasController::class, 'add']);
   $group->post('/tareas/plantareas/recursosvinculados/registrar', [RecursosvinculadosController::class, 'insertarRecursoPorTarea']);
   $group->post('/tareas/plantareas/activosvinculados/registrar', [ActivosvinculadosController::class, 'insertarActivoPorTarea']);
+  $group->post('/usuarios/responsablesasignados/registrar', [UsuarioController::class, 'asignarResponsables']);
+  
   //RUTAS DE INSERCION - ODT
   $group->post('/tareas/odt/registrar', [OrdenTrabajoController::class, 'add']);
   //RUTAS DE ACTUALIZACION
@@ -202,6 +204,9 @@ $app->get('/login', function (Request $req, Response $res, $args) {
 // ****************************** RUTAS DE AUTENTICACION **************************************
 $app->post('/login', [UsuarioController::class, 'login']); //ME QUEDE ACA
 // ******************** RUTAS DE ACCESO A DATOS ***********************************************
+//Registrar, obtener usuarios/responsables
+$app->get('/transparenciawsrest/consulta/usuarios/data', [UsuarioController::class, 'getDataUsuario']);
+//variado
 $app->get('/transparenciawsrest/consulta/plantareas/data', [PlandetareasController::class, 'getAll']);
 $app->get('/transparenciawsrest/consulta/recursos/{idcategoria}', [RecursoController::class, 'getAll']);
 $app->get('/transparenciawsrest/consulta/activos/{idcategoria}', [ActivoController::class, 'getAll']);
@@ -216,9 +221,10 @@ $app->get('/transparenciawsrest/consulta/activos/plantarea/{idplantarea}', [Acti
 $app->get('/transparenciawsrest/consulta/activosvinculados/{idactivovinculado}', [ActivosvinculadosController::class, 'obtenerUnActivoVinculadoAtarea']); //
 $app->get('/transparenciawsrest/consulta/categorias/data', [CategoriaController::class, 'getAll']); //
 // registrar, obtener, actualizar odt
-$app->get('/transparenciawsrest/consulta/tareasodt/data', [TareasController::class, 'obtenerTareas']);
+$app->get('/transparenciawsrest/consulta/tareas/data', [TareasController::class, 'obtenerTareas']);
 $app->get('/transparenciawsrest/consulta/tareaodt/{idodt}', [OrdenTrabajoController::class, 'obtenerTareaDeOdtGenerada']);
 $app->get('/transparenciawsrest/consulta/tarea/verificar/data', [OrdenTrabajoController::class, 'verificarTareaInconclusa']);
+$app->get('/transparenciawsrest/consulta/tareasodt/data', [OrdenTrabajoController::class, 'obtenerTareasOdt']);
 
 //$app->get('/')
 

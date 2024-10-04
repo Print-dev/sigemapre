@@ -4,12 +4,10 @@ DROP PROCEDURE `actualizarPlanDeTareas`
 DELIMITER $$
 CREATE PROCEDURE actualizarPlanDeTareas(
     IN _idplantarea INT, 
-    IN _descripcion VARCHAR(30), 
     IN _borrador BOOLEAN)
 BEGIN
     UPDATE plandetareas 
-    SET descripcion = _descripcion, 
-        borrador = _borrador, 
+    SET borrador = _borrador, 
         update_at = NOW()
     WHERE idplantarea = _idplantarea;
 END $$

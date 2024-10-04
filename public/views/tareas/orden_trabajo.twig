@@ -10,7 +10,7 @@
 <main class="mainOdt">
     <h1>Orden de trabajo</h1>
     <div class="tablero">
-        <div class="col-tablero" data-idcolumna="pediente">
+        <div class="col-tablero" data-idcolumna="pendientes">
             <div class="nom-col">
                 <h3>Pendientes</h3>
             </div>
@@ -54,6 +54,7 @@
         const idusuario = idUnDecoded.toLowerCase()
         let rolUnDecoded = "{{ session['login']['rol'] }}";
         const rol = rolUnDecoded.toLowerCase();
+        let cardIdCounter = 0;
         console.log("idusuario:", idusuario)
         function $(object = null) {
             return document.querySelector(object);
@@ -66,7 +67,7 @@
             // Cuando empieza a arrastrar
             tarea.addEventListener("dragstart", (e) => {
                 tarea.classList.add("arrastrando");
-                e.dataTransfer.setData("text", tarea.getAttribute("data-idtarea")); // Almacenar el data-idtarea del elemento arrastrado
+                e.dataTransfer.setData("text", tarea.getAttribute("id")); // Almacenar el data-idtarea del elemento arrastrado
 
             });
 
@@ -79,7 +80,7 @@
         // Evento de click (solo ejemplo)
         function addClickEvent(tarea) {
             tarea.addEventListener("click", () => {
-                const tareaid = tarea.getAttribute("data-idtarea");
+                const tareaid = tarea.getAttribute("id");
                 console.log(tareaid);
             });
         }
@@ -94,19 +95,32 @@
             // Soltar el elemento en la nueva columna
             zona.addEventListener("drop", async (e) => {
                 e.preventDefault();
-                const idTarea = e.dataTransfer.getData("text");
-                console.log("IDTAREA:", idTarea)
-                const tareaArrastrada = document.querySelector(`[data-idtarea='${idTarea}']`);
+                let redirigir = true
+                const idTareaCard = e.dataTransfer.getData("text");
+                console.log("IDTAREA:", idTareaCard)
+                const tareaArrastrada = document.querySelector(`[id='${idTareaCard}']`); // div que contiene la card tarea
+                console.log("tarea que esta siend arrastrada: ", tareaArrastrada)
                 if (tareaArrastrada) {
-                    const columnaDestino = zona.querySelector('.contenido-col-' + zona.getAttribute('data-idcolumna'));
-                    columnaDestino.appendChild(tareaArrastrada);
-                    const idcolumna = zona.getAttribute("data-idcolumna");
-                    if (idcolumna === "proceso") {
-                        console.log("la tarea esta ne la columan prodceso")
-                        const idOdt = await registrarOdt(idTarea)
-                        console.log(idOdt[0].id)
-                        window.localStorage.setItem("idodt", idOdt[0].id)
-                        window.location.href = `/usuario/tareas/odt/registrar`
+                    const columnaDestino = zona.querySelector('.contenido-col-' + zona.getAttribute('data-idcolumna')); // div que es la columna "pendiente, proceso, revision, finalizada"
+                    columnaDestino.appendChild(tareaArrastrada); // agregamos la CARD TAREA  a la columna respectiva
+                    const columna = zona.getAttribute("data-idcolumna"); // obtenemos el atributo del div de la columna "pendiente/proceso/revision/finalizada"
+                    console.log("DIV columnaDestino: ", columnaDestino)
+                    console.log("NOMBRE COLUMNA: ", columna)
+                    const idtarea = tareaArrastrada.getAttribute("data-idtarea");
+                    console.log("ID de la tarea:", idtarea);
+                    if (columna === "proceso") {
+                        if (tareaArrastrada.getAttribute("estado") === "proceso") {
+                            redirigir = false
+                            return
+                        }
+                        if (redirigir) {
+                            console.log("la tarea esta ne la columan prodceso")
+                            const idOdt = await registrarOdt(idtarea)
+                            console.log(idOdt[0].id)
+                            window.localStorage.setItem("idodt", idOdt[0].id)
+                            window.location.href = `/usuario/tareas/odt/registrar`
+                        }
+
                     }
                 }
             });
@@ -117,14 +131,59 @@
             formOdt.append("idtarea", idtarea)
             formOdt.append("creado_por", idusuario)
             const dataOdt = await fetch(`/${rol}/tareas/odt/registrar`, { method: 'POST', body: formOdt })
-            const idodt = dataOdt.json()
+            const idodt = await dataOdt.json()
             return idodt
         }
 
-        
-        async function renderTareaCard(tareaData) {
+        async function renderTareaCardOdt(tareaData) {
             const tarea = document.createElement("div");
-            tarea.classList.add("tarea"); ME QUEDE ACAAAAAAAAAAAAAA
+            tarea.classList.add("tarea", "tarea-odt");
+
+            const uniqueCardId = `odt-card-${++cardIdCounter}`;
+            tarea.setAttribute("id", uniqueCardId);
+            tarea.setAttribute("draggable", "true");
+            tarea.setAttribute("estado", tareaData.estado)
+            tarea.setAttribute("data-idtarea", tareaData.idtarea);
+
+            const fechaInicio = new Date(tareaData.fecha_inicio).toLocaleDateString();
+            const fechaVencimiento = new Date(tareaData.fecha_vencimiento).toLocaleDateString();
+
+            // Procesar los responsables
+            const responsablesArray = tareaData.responsables.split(", ");
+            let responsablesText;
+            if (responsablesArray.length > 1) {
+                responsablesText = `${responsablesArray[0]} y ${responsablesArray.length - 1} más`;
+            } else {
+                responsablesText = responsablesArray[0];
+            }
+
+            tarea.innerHTML = `
+                <h3>${tareaData.tarea}</h3>
+                <div class="contenedor-responsables">
+                    <img src="https://www.iconpacks.net/icons/1/free-user-group-icon-296-thumb.png"/>
+                    <p>${responsablesText}</p>
+                </div>
+                <p class="creadapor">Creada por ${tareaData.creador}</p>
+                <p class="activo-odt">${tareaData.activo}</p>
+                
+                <div class="contenedor-barra-general">
+                    <div class="barra-contenedor">
+                        <span class="porcentaje-${tareaData.clasificacion}"></span>                    
+                    </div>
+                    <p class="porcentaje-texto">${tareaData.clasificacion === 'finalizado' ? '100' : tareaData.clasificacion === 'iniciado' ? '50' : '0'}%</p>
+                </div>
+            `;
+
+            return tarea;
+        }
+
+        async function renderTareaCardPendientes(tareaData) {
+            const tarea = document.createElement("div");
+            tarea.classList.add("tarea");
+            // Incrementar el contador global y usarlo como el ID único
+            const uniqueCardId = `tarea-card-${++cardIdCounter}`;
+            console.log("uniqueCardId:", uniqueCardId)
+            tarea.setAttribute("id", uniqueCardId)
             tarea.setAttribute("draggable", "true");
             tarea.setAttribute("data-idtarea", tareaData.idtarea); // Usar data-idtarea
 
@@ -140,12 +199,12 @@
                 </div>
                 <p>${tareaData.plantarea}</p>
                 <p>${tareaData.activo}</p>
-                <div>
+                <div class="contenedor-prioridad">
                     <span class="prioridad-${tareaData.prioridad}"></span>
                     <p>${tareaData.prioridad}</p>
                 </div>
             `;
-            
+
             console.log(tarea)
             return tarea;
 
@@ -153,17 +212,23 @@
 
         // Renderizar las tareas en la columna "Pendientes"
         async function renderKanban() {
-            const fdata = await fetch(`/transparenciawsrest/consulta/tareasodt/data`, { method: 'GET' });
-            const data = await fdata.json();
+            const ftareas = await fetch(`/transparenciawsrest/consulta/tareas/data`, { method: 'GET' });
+            const ftareasOdt = await fetch(`/transparenciawsrest/consulta/tareasodt/data`, { method: 'GET' })
+            const tareas = await ftareas.json();
+            const tareasOdt = await ftareasOdt.json()
 
-            console.log("tareas agregadas al kabnban: ", data)
+            console.log("tareas agregadas al kabnban: ", tareas)
+            console.log("tareas de la odt generada: ", tareasOdt)
             const tpendientes = $(".contenido-col-pendientes");
+            const tproceso = $(".contenido-col-proceso");
+            const trevision = $(".contenido-col-revision");
+            const tfinalizado = $(".contenido-col-finalizado");
             //const tproceso = $(".")
 
-            for (let i = 0; i < data.length; i++) {
-                const tareaCard = await renderTareaCard(data[i])
+            for (let i = 0; i < tareas.length; i++) {
+                const tareaCard = await renderTareaCardPendientes(tareas[i])
 
-                switch (data[i].estado) {
+                switch (tareas[i].estado) {
                     case 'pendiente':
                         // Agregar los eventos de arrastre y click
                         addDragEvents(await tareaCard);
@@ -173,10 +238,26 @@
                         tpendientes.appendChild(await tareaCard);
                         break;
 
-                    case 'proceso':
+                    /* case 'proceso':
                         const tareaCardProceso = await renderTareaCard(data[i])
                         addDragEvents(await tareaCard);
                         addClickEvent(await tareaCard);
+                        break; */
+                }
+            }
+
+            for (let i = 0; i < tareasOdt.length; i++) {
+                const tareaCard = await renderTareaCardOdt(tareasOdt[i])
+                switch (tareasOdt[i].estado) {
+                    case 'proceso':
+                        addDragEvents(await tareaCard);
+                        addClickEvent(await tareaCard);
+
+                        // Agregar la tarea a la columna "Pendientes"
+                        tproceso.appendChild(await tareaCard);
+                        break;
+
+                    default:
                         break;
                 }
             }

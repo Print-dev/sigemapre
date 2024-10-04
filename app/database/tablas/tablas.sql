@@ -44,7 +44,7 @@ CREATE TABLE permisos
 
 CREATE TABLE usuarios
 (
-  idusuario	int auto_increment primary key,
+  idusuario		int auto_increment primary key,
   idpersona	  	int not null,
   idrol		    int not null,
   usuario     	varchar(120) not null,

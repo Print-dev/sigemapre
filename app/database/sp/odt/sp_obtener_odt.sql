@@ -44,26 +44,37 @@ BEGIN
         WHERE EST.idestado = _idestado;
 END //
 
-DROP PROCEDURE IF EXISTS `obtenerTareaDeOdtGenerada`
+DROP PROCEDURE IF EXISTS `obtenerTareasOdt`
 DELIMITER //
-CREATE PROCEDURE `obtenerTareaDeOdtGenerada`
-(
-	IN _idodt INT
-)
+CREATE PROCEDURE `obtenerTareasOdt` ()
 BEGIN 
-	SELECT 
-		ODT.idorden_trabajo,
-        PT.descripcion as plantarea,
-		TAR.descripcion as tarea,
-        TAR.idtarea as idtarea,
-        ACT.descripcion as activo,
-        TAR.tiempo_estimado as duracion
-		from odt ODT
-        INNER JOIN tareas TAR ON TAR.idtarea = ODT.idtarea
-        INNER JOIN activos_vinculados_tarea AVT ON AVT.idtarea = TAR.idtarea
-        INNER JOIN activos ACT ON ACT.idactivo = AVT.idactivo
-        INNER JOIN plandetareas PT ON PT.idplantarea = TAR.idplantarea
-        INNER JOIN usuarios USU ON USU.idusuario = ODT.creado_por
-        INNER JOIN estados EST ON EST.idestado = ODT.idestado
-        WHERE ODT.idorden_trabajo = _idodt;
+    SELECT 
+        ODT.idorden_trabajo,
+        -- Concatenar los nombres y apellidos de los responsables
+        GROUP_CONCAT(CONCAT(PERRES.nombres, ' ', PERRES.apellidos) SEPARATOR ', ') AS responsables,
+        TAR.descripcion AS tarea,
+        TAR.fecha_inicio,
+        TAR.fecha_vencimiento,
+        CONCAT(PERCRE.nombres, ' ', PERCRE.apellidos) AS creador,
+        TAR.idtarea AS idtarea,
+        ACT.descripcion AS activo,
+        TAR.tiempo_estimado AS duracion,
+        EST.estado,
+        DODT.clasificacion
+    FROM odt ODT
+    INNER JOIN responsables_asignados RA ON RA.idorden_trabajo = ODT.idorden_trabajo
+    INNER JOIN usuarios USURES ON USURES.idusuario = RA.idresponsable
+    INNER JOIN personas PERRES ON PERRES.idpersona = USURES.idpersona
+    INNER JOIN usuarios USUCRE ON USUCRE.idusuario = ODT.creado_por
+    INNER JOIN personas PERCRE ON PERCRE.idpersona = USUCRE.idpersona
+    INNER JOIN tareas TAR ON TAR.idtarea = ODT.idtarea
+    INNER JOIN activos_vinculados_tarea AVT ON AVT.idtarea = TAR.idtarea
+    INNER JOIN activos ACT ON ACT.idactivo = AVT.idactivo
+    INNER JOIN plandetareas PT ON PT.idplantarea = TAR.idplantarea
+    INNER JOIN estados EST ON EST.idestado = ODT.idestado
+    LEFT JOIN detalle_odt DODT ON DODT.clasificacion = EST.idestado 
+    GROUP BY ODT.idorden_trabajo, TAR.descripcion, TAR.fecha_inicio, TAR.fecha_vencimiento, PERCRE.nombres, PERCRE.apellidos, TAR.idtarea, ACT.descripcion, TAR.tiempo_estimado, EST.estado;
 END //
+
+select * from responsables_asignados;
+call obtenerTareasOdt;

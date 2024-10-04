@@ -74,7 +74,7 @@ INSERT INTO marcas(marca)
 
 
 -- INSERCIONES ROYER
-INSERT INTO tipo_estados (tipo_estado) values ('odt'),('activo'),('solicitud'),('responsable'),('recurso'),('tarea'),('detalle_odt');
+INSERT INTO tipo_estados (tipo_estado) values ('odt'),('activo'),('solicitud'),('responsable'),('recurso'),('tarea'),('detalle_odt'),('usuario');
 INSERT INTO estados (idtipo_estado, estado) values 
 		(1,'pendiente'),
         (1,'proceso'),
@@ -94,7 +94,9 @@ INSERT INTO estados (idtipo_estado, estado) values
         (6,'sin tomar'),
         (6,'vencido'),
         (7,'exitoso'),
-        (7,'atrasado');        
+        (7,'atrasado'),      
+        (8,'disponible'),
+        (8, 'ocupado');
 	
 select * from estados;
 	
@@ -163,6 +165,15 @@ VALUES
 (9, 2),
 (10, 3);
 
+INSERT INTO detalle_recurso (idrecurso, stock_total, en_uso, en_reparacion, fuera_de_uso, idestado)
+VALUES 
+(4, 40, 10, 0, 3, 1),  -- Taladro
+(5, 50, 5, 0, 0, 1),   -- Destornillador
+(2, 100, 20, 0, 0, 1), -- Casco de Seguridad
+(1, 30, 5, 2, 0, 1),   -- Taladro
+(3, 200, 50, 0, 10, 1);-- Cemento
+
+
 INSERT INTO recursos_vinculados_tarea (idrecurso, idtarea, cantidad)
 VALUES 
 (4, 1, 1),
@@ -173,13 +184,7 @@ VALUES
 (1, 2),  -- Activo 1 vinculado a la tarea 1
 (2, 1);  -- Activo 2 vinculado a la tarea 1
 
-INSERT INTO detalle_recurso (idrecurso, stock_total, en_uso, en_reparacion, fuera_de_uso, idestado)
-VALUES 
-(4, 40, 10, 0, 3, 1),  -- Taladro
-(5, 50, 5, 0, 0, 1),   -- Destornillador
-(2, 100, 20, 0, 0, 1), -- Casco de Seguridad
-(1, 30, 5, 2, 0, 1),   -- Taladro
-(3, 200, 50, 0, 10, 1);-- Cemento
+
 
 -- INSERT INTO responsables_asignados (idorden_trabajo, idresponsable)
 -- VALUES 

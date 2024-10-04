@@ -8,6 +8,8 @@ require_once 'ExecQuery.php';
 
 class Usuario extends ExecQuery{
 
+  private $pdo;
+
   public function login($params=[]):array{
     try{
       $sp = parent::execQ("CALL sp_user_login(?)");
@@ -27,6 +29,22 @@ class Usuario extends ExecQuery{
       die($e->getMessage());
     }
   }
+
+  
+  public function asignarResponsables($params=[]):int{
+    try{
+      $sp = parent::execQ("CALL asignarResponsables(@idresponsable_asignado,?,?,?)");
+      $sp->execute(array(
+        $params['idorden_trabajo'],
+        $params['idresponsable']
+      ));
+      $response = $this->pdo->query("SELECT @idresponsable_asignado as idresponsable_asignado")->fetch(\PDO::FETCH_ASSOC);
+      return (int) $response['idresponsable_asignado'];
+    }catch(\Exception $e){
+      die($e->getMessage());
+      return -1;
+    }
+  } 
 }
 //echo (password_hash('contrasena2', PASSWORD_BCRYPT));
 

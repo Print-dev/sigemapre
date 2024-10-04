@@ -47,4 +47,11 @@ class OrdenTrabajoController
     
   }
   
+  public function obtenerTareasOdt(Request $req, Response $res, $args)
+  {
+    $pt = $this->ordentrabajo->obtenerTareasOdt();
+    $res->getBody()->write(json_encode($pt));
+    return $res->withHeader('Content-Type', 'application/json');
+    
+  }
 }

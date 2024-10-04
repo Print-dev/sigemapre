@@ -417,7 +417,7 @@
 							</li>
 						</div>
           `;
-          eliminarActivoVinculadoIndividual()
+          await eliminarActivoVinculadoIndividual()
         }
         console.log("ul activos agregados: ", ulActivosAgregados)
       }
@@ -608,6 +608,7 @@
           idplantarea: idplantarea,
           borrador: 0 // EL PLAN YA NO SERA BORRADOR
         }
+        console.log("ANTES DE EJECUTARRRRRRR: ", datosActualizar)
         const cambio = await fetch(`/${rol}/tareas/plantareas/actualizar`, {method: 'PUT',headers: {'Content-Type': 'application/json'}, body: JSON.stringify(datosActualizar)})
         console.log("cambio de estado el plan?: ", await cambio.json())
       }
@@ -960,7 +961,7 @@
         const formPlanTarea = new FormData();
         formPlanTarea.append("descripcion", descripcionPlanTarea.value);
         formPlanTarea.append("idcategoria", selectCategorias.value)
-        formPlanTarea.append("borrador", 1)
+        formPlanTarea.append("borrador", 1) //cuando se registra un nuevo plan se genera en forma borrador
         //PRIMER PASO: VERIFICAR SI EL PLAN A REGISTRAR YA EXISTE
         const obtenerPlanDeTareas = await axios.get('/transparenciawsrest/consulta/plantareas/data')
         const obtenerPlanDeTareasData = obtenerPlanDeTareas.data

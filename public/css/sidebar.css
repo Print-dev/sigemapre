@@ -1,41 +1,74 @@
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: "Outfit", sans-serif;
 }
 
-body{
+body {
   background-color: rgb(255, 255, 255);
 }
 
-.container{
+.container {
   width: 100%;
   display: flex;
   min-height: 100vh;
 }
 
-.sidebar{
+.sidebar {
   position: fixed;
   width: 256px;
   height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: rgb(77,52,168);background: linear-gradient(180deg, rgba(77,52,168,1) 0%, rgba(58,98,255,1) 100%);
+  background: linear-gradient(180deg, rgba(77,52,168,1) 0%, rgba(58,98,255,1) 100%);
   padding: 24px;
   z-index: 1000;
+  transition: width 0.3s ease;
 }
 
-.sidebar .head{
+.sidebar.minimized {
+  width: 60px;
+}
+
+.sidebar.minimized .text,
+.sidebar.minimized .arrow,
+.sidebar.minimized p {
+  display: none;
+}
+
+.sidebar.minimized .menu ul li a {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.sidebar.minimized .icon {
+  margin: 0 auto;
+}
+
+.menu .sub-menu-activos,
+.menu .sub-menu-tareas,
+.menu .sub-menu-usuarios {
+  display: none; /* Oculta los submenús por defecto */
+  margin-left: 20px;
+  padding-left: 20px;
+  padding-top: 5px;
+  border-left: 1px solid #f6f6f6f6;
+}
+
+.menu .sub-menu-active {
+  display: block; /* Muestra el submenú cuando está activo */
+}
+
+.sidebar .head {
   display: flex;
   gap: 20px;
   padding-bottom: 20px;
   border-bottom: 1px solid #960b0b00;
 }
 
-
-.sidebar .foot{
+.sidebar .foot {
   display: flex;
   gap: 20px;
   padding-top: 20px;
@@ -43,7 +76,7 @@ body{
   margin-top: auto;
 }
 
-.user-img{
+.user-img {
   background-color: rgb(255, 255, 255);
   width: 44px;
   height: 44px;
@@ -51,31 +84,31 @@ body{
   overflow: hidden;
 }
 
-.user-img img{
+.user-img img {
   width: 100%;
   object-fit: cover;
 }
 
 .user-details .title,
-.menu .title{
+.menu .title {
   font-size: 18px;
   font-weight: bold;
   color: rgb(255, 255, 255);
 }
 
-.user-details .name{
+.user-details .name {
   color: aliceblue;
   font-weight: lighter;
   font-size: 14px;
   font-weight: 500;
 }
 
-.menu ul li{
+.menu ul li {
   list-style: none;
   margin-bottom: 5px;
 }
 
-.menu ul li a{
+.menu ul li a {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -88,45 +121,24 @@ body{
   transition: all 0.1s;
 }
 
-.menu ul li a:hover{
+.menu ul li a:hover {
   color: black;
   background-color: #f6f6f6;
 }
 
-.menu ul li .icon{
+.menu ul li .icon {
   font-size: 20px;
 }
 
-.menu ul li .text{
+.menu ul li .text {
   flex: 1;
 }
 
-.menu ul li .arrow{
+.menu ul li .arrow {
   font-size: 14px;
 }
 
-.menu .sub-menu-tareas{
-  margin-left: 20px;
-  padding-left: 20px;
-  padding-top: 5px;
-  border-left: 1px solid #f6f6f6f6;
-}
-
-.menu .sub-menu-activos{
-  margin-left: 20px;
-  padding-left: 20px;
-  padding-top: 5px;
-  border-left: 1px solid #f6f6f6f6;
-}
-
-.menu .sub-menu-usuarios{
-  margin-left: 20px;
-  padding-left: 20px;
-  padding-top: 5px;
-  border-left: 1px solid #f6f6f6f6;
-}
-
-.head .icon{
+.head .icon {
   color: white;
   font-size: 28px;
   display: flex;
@@ -134,7 +146,7 @@ body{
   justify-content: center;
 }
 
-.head p{
+.head p {
   font-size: 28px;
   font-weight: bold;
   color: white;

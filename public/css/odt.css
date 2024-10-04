@@ -79,6 +79,13 @@
     color: #666;
 }
 
+.tarea .contenedor-prioridad{
+    margin-top: 5px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
 /* Estilo para la prioridad de la tarea */
 
 /* Colores personalizados según prioridad */
@@ -133,4 +140,90 @@
 
 .contenido-col-finalizado .tarea {
     border-left: 5px solid #4caf50;  /* Verde para finalizadas */
+}
+
+.tarea{
+    user-select: none; /* Estándar */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
+}
+
+/* Contenedor general de la barra */
+.barra-contenedor {
+    background-color: #e0e0e0; /* Color de fondo de la barra vacía */
+    border-radius: 5px;
+    height: 20px;
+    width: 100%; /* Ajustar al ancho del contenedor */
+    margin-top: 10px;
+    overflow: hidden; /* Evitar que el contenido se salga del contenedor */
+}
+
+/* Barra para porcentaje-null (0%) */
+.tarea-odt .porcentaje-null {
+    display: block;
+    height: 100%;
+    width: 0%; /* 0% completado */
+    background-color: #f44336; /* Rojo para el progreso 0% */
+    transition: width 0.4s ease; /* Animación suave al cargar */
+}
+
+/* Barra para porcentaje-iniciado (50%) */
+.tarea-odt .porcentaje-iniciado {
+    display: block;
+    height: 100%;
+    width: 50%; /* 50% completado */
+    background-color: #ff9800; /* Naranja para el progreso 50% */
+    transition: width 0.4s ease;
+}
+
+/* Barra para porcentaje-finalizado (100%) */
+.tarea-odt .porcentaje-finalizado {
+    display: block;
+    height: 100%;
+    width: 100%; /* 100% completado */
+    background-color: #4caf50; /* Verde para el progreso 100% */
+    transition: width 0.4s ease;
+}
+
+/* Texto del porcentaje */
+.porcentaje-texto {
+    margin-left: 5px;
+    margin-top: 10px; /* Espacio entre la barra y el texto */
+    font-weight: bold; /* Hacer el texto más prominente */
+    color: #333; /* Color del texto */
+}
+
+.contenedor-barra-general{
+    display: flex;
+    flex-direction: row;
+}
+
+.tarea-odt img{
+    width: 30px;
+}
+
+.contenedor-responsables{
+    display: flex;
+    margin-top: 10px;
+}
+
+.contenedor-responsables p{
+    font-weight: bold;
+    margin-left: 5px;
+    margin-top: 5px;
+}
+
+.tarea-odt .creadapor{
+    font-size: 13px;
+    margin-top: 5px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #666;
+}
+
+.tarea-odt .activo-odt{
+    margin-top: 5px;
+    font-weight: bold;
 }

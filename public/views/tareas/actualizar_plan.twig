@@ -536,7 +536,7 @@
 					fecha_vencimiento: fechaVencimiento,
 					cant_intervalo: intervaloTarea,
 					frecuencia: frecuenciaTarea,
-					idestado: 15 // Cambia esto si es necesario
+					idestado: 1 // Cambia esto si es necesario
 				};
 
 				try {
@@ -672,14 +672,14 @@
 			}
 
 			async function planTerminado(idplantarea) {
-        console.log("ID PLAN A ACTUALIZAR EL BORRADOR; ", idplantarea)
-        const datosActualizar = {
-          idplantarea: idplantarea,
-          borrador: 0 // EL PLAN YA NO SERA BORRADOR
-        }
-        const cambio = await fetch(`/${rol}/tareas/plantareas/actualizar`, {method: 'PUT',headers: {'Content-Type': 'application/json'}, body: JSON.stringify(datosActualizar)})
-        console.log("cambio de estado el plan?: ", await cambio.json())
-      }
+				console.log("ID PLAN A ACTUALIZAR EL BORRADOR; ", idplantarea)
+				const datosActualizar = {
+				idplantarea: idplantarea,
+				borrador: 0 // EL PLAN YA NO SERA BORRADOR
+				}
+				const cambio = await fetch(`/${rol}/tareas/plantareas/actualizar`, {method: 'PUT',headers: {'Content-Type': 'application/json'}, body: JSON.stringify(datosActualizar)})
+				console.log("cambio de estado el plan?: ", await cambio.json())
+			}
 
 			//ESTO ACTUARA CUANDO UN CHECKBOX ES MARCADO EN EL SELECTOR DE RECURSOS PARA UNA TAREA
 			//ESTO ACTUARA CUANDO UN CHECKBOX ES MARADO EN EL SELECTOR DE ACTIVOS PARA UNA TAREA
