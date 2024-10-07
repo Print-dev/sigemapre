@@ -1,26 +1,46 @@
 <?php
 
-use App\Config\Conexion;
+namespace App\Models;
 
-require_once '../config/Conexion.php';
+use App\Models\ExecQuery;
 
-class Diagnostico extends Conexion{
+require_once 'ExecQuery.php';
 
-  private $pdo;
+class Diagnostico extends ExecQuery
+{
 
-  public function __construct()
-  {
-    $this->pdo = parent::getConexion();
-  }
-  //
-  public function getALL(){
-    $sp = $this->pdo->prepare("SELECT * FROM estados");
-    $sp->execute();
-    print_r( $sp->fetchAll(\PDO::FETCH_ASSOC));
-    print_r($this->pdo->lastInsertId());
-  }
   // FUTUROS METODOS
-}
 
-$a = new Diagnostico();
-$a->getALL();
+  public function registrarDiagnostico($params = []): bool
+  {
+    try {
+      $status = false;
+      $sp = parent::execQ("CALL registrarDiagnostico(?,?,?,?)");
+      $status = $sp->execute(
+        array(
+          $params['idordentrabajo'],
+          $params['idtipodiagnostico'],
+          $params['diagnostico'],
+          $params['evidencias']
+        )
+      );
+      return $status;
+    } catch (\Exception $e) {
+      die($e->getMessage());
+    }
+  }
+
+  public function obtenerDiagnosticoEvidencias($params = []): array
+  {
+    try {
+      $sp = parent::execQ("CALL obtenerDiagnosticoEvidencias(?,?)");
+      $sp->execute(array(
+        $params['idodt'],
+        $params['idtipodiagnostico']
+      ));
+      return $sp->fetchAll(\PDO::FETCH_ASSOC);
+    } catch (\Exception $e) {
+      die($e->getMessage());
+    }
+  }
+}

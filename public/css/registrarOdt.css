@@ -21,7 +21,6 @@
     width: 30%; /* Ajusta este valor según tus necesidades */
     flex-shrink: 0; /* Evita que el contenedor se encoja */
     margin: 10px; /* Espaciado entre contenedores */
-    background-color: white; /* Color de fondo opcional */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra opcional para destacar */
     padding: 15px; /* Espaciado interno */
     border-radius: 8px; /* Esquinas redondeadas opcionales */
@@ -296,4 +295,117 @@ h2 {
 
 .modal-footer button:hover {
     background-color: #0056b3;
+}
+
+/* CONTENEDOR DE EVIDENCIAS */
+.contenedor-evidencias {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+.custom-file-input {
+    display: none;
+}
+
+.custom-file-label {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.2s ease;
+    border: none;
+}
+
+.preview-container {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    min-height: 150px; /* Espacio mínimo para el contenedor */
+    align-items: center;
+    position: relative;
+}
+
+/* Texto de no imágenes seleccionadas */
+.no-images-text {
+    font-size: 16px;
+    color: #999;
+}
+
+/* Estilos para las imágenes */
+.preview-container figure {
+    position: relative;
+    display: inline-block;
+}
+
+.preview-container img {
+    width: 100%;
+    height: auto;
+    transition: filter 0.3s ease; /* Suaviza el efecto de difuminado */
+}
+
+.preview-container img:hover {
+    filter: blur(4px); /* Difumina la imagen cuando se pasa el cursor */
+}
+
+.preview-container figcaption {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Fondo oscuro semi-transparente */
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease; /* Suaviza la aparición del texto */
+}
+
+.preview-container figure:hover figcaption {
+    opacity: 1; /* Muestra el texto cuando se pasa el cursor por encima del figure */    
+    cursor: pointer;
+    
+}
+
+/* Modal Sidebar (hidden by default) */
+.modal-sidebar {
+    position: fixed;
+    top: 0;
+    right: -100%; /* Ocultarlo inicialmente */
+    width: 30%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9); /* Un fondo blanco semi-transparente */
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+    transition: right 0.3s ease; /* Transición suave */
+    z-index: 1000; /* Asegúrate de que este valor sea alto */
+    display: flex; /* Usar flex para centrar contenido */
+    flex-direction: column; /* Para organizar el contenido en columna */
+}
+
+/* Mostrar el modal */
+.modal-sidebar.show {
+    right: 0; /* Mostrar el modal deslizándose */
+}
+
+/* Contenido del modal */
+.contenido-modal {
+    padding: 20px; /* Espaciado alrededor del contenido */
+    overflow: auto; /* Permitir el desplazamiento si el contenido es más grande */
+}
+
+/* Estilo del botón de cerrar */
+.close {
+    cursor: pointer; /* Cambiar el cursor al pasar por encima */
+    font-size: 24px; /* Aumentar el tamaño del botón de cerrar */
+    color: #000; /* Color del texto */
+    float: right; /* Alinear a la derecha */
 }

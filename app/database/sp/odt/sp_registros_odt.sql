@@ -29,6 +29,8 @@ BEGIN
 		VALUES (_idorden_trabajo, _idtipo_diagnostico, _diagnostico, _evidencias);
 END //
 
+CALL registrarDiagnostico(20,1,'desde mysql', '{"e1":"img.jpg","e2":"img2.jpg", "e3":"img3.jpg"}')
+
 DROP PROCEDURE IF EXISTS `asignarResponsablesODT`
 DELIMITER //
 CREATE PROCEDURE `asignarResponsablesODT`

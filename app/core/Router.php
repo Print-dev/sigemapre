@@ -18,6 +18,7 @@ use App\Controllers\RecursoController;
 use App\Controllers\ActivoController;
 use App\Controllers\ActivosvinculadosController;
 use App\Controllers\CategoriaController;
+use App\Controllers\DiagnosticoController;
 use App\Controllers\EstadosController;
 use App\Controllers\OrdenTrabajoController;
 use App\Controllers\RecursosvinculadosController;
@@ -39,6 +40,7 @@ require_once __DIR__ . '/../controller/recursosvinculados.controller.php';
 require_once __DIR__ . '/../controller/activosvinculados.controller.php';
 require_once __DIR__ . '/../controller/categorias.controller.php';
 require_once __DIR__ . '/../controller/ordentrabajo.controller.php';
+require_once __DIR__ . '/../controller/diagnostico.controller.php';
 
 
 // ************************************************************************************************************
@@ -114,6 +116,8 @@ $app->group('/usuario', function ($group) {
   $group->post('/tareas/plantareas/recursosvinculados/registrar', [RecursosvinculadosController::class, 'insertarRecursoPorTarea']);
   $group->post('/tareas/plantareas/activosvinculados/registrar', [ActivosvinculadosController::class, 'insertarActivoPorTarea']);
   $group->post('/usuarios/responsablesasignados/registrar', [UsuarioController::class, 'asignarResponsables']);
+  $group->post('/odt/diagnostico/registrar', [DiagnosticoController::class, 'registrarDiagnostico']);
+  
   
   //RUTAS DE INSERCION - ODT
   $group->post('/tareas/odt/registrar', [OrdenTrabajoController::class, 'add']);
@@ -121,13 +125,16 @@ $app->group('/usuario', function ($group) {
   $group->put('/tareas/plantareas/tarea/actualizar', [TareasController::class, 'actualizarTarea']);
   $group->put('/tareas/plantareas/recursosvinculados/actualizar', [RecursosvinculadosController::class, 'actualizarRecursoPorTarea']);  
   $group->put('/tareas/plantareas/actualizar', [PlandetareasController::class, 'actualizarPlanDeTareas']);
+  $group->put('/tareas/odt/actualizar', [OrdenTrabajoController::class, 'actualizarBorradorOdt']);
+  
   //RUTAS DE ELIMINACION
   $group->delete('/tareas/plantareas/plantarea/{idplantarea}', [PlandetareasController::class, 'eliminarPlanDeTarea']);
   $group->delete('/tareas/plantareas/tarea/{idtarea}', [TareasController::class, 'eliminarTarea']);
   $group->delete('/tareas/plantareas/recursosvinculados/{idrecursovinculado}', [RecursosvinculadosController::class, 'eliminarRecursosVinculadosTarea']);
   $group->delete('/tareas/plantareas/activosvinculados/{idactivovinculado}', [ActivosvinculadosController::class, 'eliminarActivosVinculadosTarea']);
+  $group->delete('/tareas/plantareas/responsableasignado/{idresponsableasignado}', [UsuarioController::class, 'eliminarResponsableOdt']);
 
-
+  
   //RUTAS USUARIOS
   $group->get('/usuarios/listarusuarios', function (Request $req, Response $res, $args) {
     $view = $this->get('usuarios');
@@ -206,6 +213,9 @@ $app->post('/login', [UsuarioController::class, 'login']); //ME QUEDE ACA
 // ******************** RUTAS DE ACCESO A DATOS ***********************************************
 //Registrar, obtener usuarios/responsables
 $app->get('/transparenciawsrest/consulta/usuarios/data', [UsuarioController::class, 'getDataUsuario']);
+$app->get('/transparenciawsrest/consulta/usuario/{idusuario}', [UsuarioController::class, 'obtenerUsuario']);
+$app->get('/transparenciawsrest/consulta/responsables/{idorden_trabajo}', [UsuarioController::class, 'obtenerResponsablesPorOdt']);
+
 //variado
 $app->get('/transparenciawsrest/consulta/plantareas/data', [PlandetareasController::class, 'getAll']);
 $app->get('/transparenciawsrest/consulta/recursos/{idcategoria}', [RecursoController::class, 'getAll']);
@@ -224,9 +234,10 @@ $app->get('/transparenciawsrest/consulta/categorias/data', [CategoriaController:
 $app->get('/transparenciawsrest/consulta/tareas/data', [TareasController::class, 'obtenerTareas']);
 $app->get('/transparenciawsrest/consulta/tareaodt/{idodt}', [OrdenTrabajoController::class, 'obtenerTareaDeOdtGenerada']);
 $app->get('/transparenciawsrest/consulta/tarea/verificar/data', [OrdenTrabajoController::class, 'verificarTareaInconclusa']);
-$app->get('/transparenciawsrest/consulta/tareasodt/data', [OrdenTrabajoController::class, 'obtenerTareasOdt']);
+$app->get('/transparenciawsrest/consulta/tareasodt/{borrador}', [OrdenTrabajoController::class, 'obtenerTareasOdt']);
+$app->get('/transparenciawsrest/consulta/diagnostico/odt/{idodt}/tipodiagnostico/{idtipodiagnostico}', [DiagnosticoController::class, 'obtenerDiagnosticoEvidencias']);
 
-//$app->get('/')
+
 
 // ***********************************************************************************************************************
 // PROBAR EL INTERNAL SERVER ERROR

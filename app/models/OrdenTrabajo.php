@@ -52,9 +52,26 @@ class OrdenTrabajo extends ExecQuery
     public function obtenerTareasOdt($params = []): array
     {
         try {
-            $cmd = parent::execQ("CALL obtenerTareasOdt()");
-            $cmd->execute();
+            $cmd = parent::execQ("CALL obtenerTareasOdt(?)");
+            $cmd->execute(array(
+                $params['borrador']
+            ));
             return $cmd->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function actualizarBorradorOdt($params = []): bool
+    {
+        try {
+            $status = false;
+            $cmd = parent::execQ("CALL actualizarBorradorOdt(?,?)");
+            $status = $cmd->execute(array(
+                $params['idordentrabajo'],
+                $params['borrador']
+            ));
+            return $status;
         } catch (\Exception $e) {
             die($e->getMessage());
         }

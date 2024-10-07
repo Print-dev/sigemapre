@@ -10,9 +10,16 @@
 <main class="mainRegOdt">
     <div class="contenedor-general">
         <div class="contenedor-diagnostico-evidencia">
+            <h2>Evidencias</h2>
             <div class="contenedor-evidencias">
-                <img width="100%" src="http://localhost/img/camaraicon.jpg" alt="">
+                <input type="file" name="evidencias[]" id="evidencias-img-input" class="custom-file-input" multiple
+                    accept="image/*">
+                <label id="file-status" for="evidencias-img-input" class="custom-file-label">Selecciona imágenes</label>
+                <div id="preview-container" class="preview-container">
+                    <p id="no-images-text" class="no-images-text">No hay imágenes seleccionadas aún</p>
+                </div>
             </div>
+
             <div class="contenedor-diagnostico-entrada">
                 <h2>Dianostico de Entrada</h2>
                 <textarea class="comment-textarea" placeholder="Escribe tu comentario aquí..."></textarea>
@@ -26,16 +33,11 @@
             <button id="btnAsignarResponsable">Asignar Responsable</button>
             <div class="contenedor-responsables-asignados">
                 <ul>
-                    <li>Responsable 1</li>
-                    <li>Responsable 1</li>
-                    <li>Responsable 1</li>
-                    <li>Responsable 1</li>
-
-
                 </ul>
             </div>
         </div>
     </div>
+    <button id="btnCrearOdt" disabled>Crear Odt</button>
     <!-- Modal -->
     <!-- Estructura del modal con cabecera, cuerpo y pie -->
     <div class="modal-overlay" id="modalOverlay">
@@ -63,7 +65,18 @@
             </div>
             <!-- Pie del modal -->
             <div class="modal-footer">
-                <button id="btnConfirmarAsignacion">Confirmar</button>
+                <button id="btnConfirmarAsignacion" disabled>Confirmaraaa</button>
+            </div>
+        </div>
+    </div>
+    <!-- INICIO MODAL SIDEBAR DERECHO -->
+    <div id="modal-sidebar" class="modal-sidebar">
+        <div class="contenido-modal"> <!--   QUITAR ESTE DIV -->
+            <span id="close-modal" class="close">&times;</span>
+            <h2>Lista de todas las evidencias</h2>
+            <div id="modal-evidencias-container">
+                <!-- Aquí se agregarán las evidencias -->
+                <p>Esto es un texto de prueba dentro de modal-content.</p> <!-- Este texto debe aparecer -->
             </div>
         </div>
     </div>
@@ -73,15 +86,42 @@
 {% block footer %}
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
+        //VARIABLES GLOBALES - permitiran gestionar si una columna ha sido modificada, es decir esto verificara que todo haya sido por lo menos agregado algo para habilitar el boton de generar ODT
+        let colResponsablesOk = false;
+        let colDiagnosticoOk = false;
+        let iddiagnostico = -1    
+
         function $(object = null) {
             return document.querySelector(object);
         }
+
+        function $all(object = null) {
+            return document.querySelectorAll(object);
+        }
+
+        const btnCrearOdt = $("#btnCrearOdt")
+        const listResponsablesAsignados = $(".contenedor-responsables-asignados ul")
         let responsables_asignados_lista = []
+        const checkboxes = $all(".usuario-checkbox")
+        const previewContainer = document.getElementById("preview-container");
+
         await loadUI()
 
         async function loadUI() {
             await renderTableUsuarios()
             await renderTareaOdt(window.localStorage.getItem("idodt"))
+            await renderResponsablesOdt()
+            estadoBotonConfirmarAsignacion()
+        }
+
+        function estadoBotonConfirmarAsignacion() {
+            const checkboxes = $all(".usuario-checkbox");
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener("change", () => {
+                    const algunoSeleccionado = Array.from(checkboxes).some(chk => chk.checked);
+                    btnConfirmarAsignacion.disabled = !algunoSeleccionado;
+                });
+            });
         }
 
         //ESTO OBTENDRA LA TAREA CUANDO SE REGISTRA UNA NUEVA ODT
@@ -140,7 +180,7 @@
             const tbodyUsuarios = $(".tbodyUsuarios")
             const dataUsuarios = await obtenerUsuarios()
             for (let i = 0; i < dataUsuarios.length; i++) {
-                console.log("dataUsuarios: ", dataUsuarios)                
+                console.log("dataUsuarios: ", dataUsuarios)
                 tbodyUsuarios.innerHTML += `
                 <tr>
                     <th scope="row">
@@ -154,11 +194,12 @@
             }
         } // TERMINADO
 
+
         // ESPACIO PARA CREAR LA ACCION DE ABRIR Y CERRAR MODELO
-        const btnAbrirModal = document.getElementById('btnAsignarResponsable');
-        const modalOverlay = document.getElementById('modalOverlay');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const btnConfirmar = document.getElementById('btnConfirmarAsignacion');
+        const btnAbrirModal = $('#btnAsignarResponsable');
+        const modalOverlay = $('#modalOverlay');
+        const closeModalBtn = $('#closeModalBtn');
+        const btnConfirmarAsignacion = $('#btnConfirmarAsignacion');
 
         // Función para abrir el modal con la animación de fade-in
         btnAbrirModal.addEventListener('click', () => {
@@ -177,28 +218,267 @@
         });
 
         // Acción en el botón de Confirmar (solo como ejemplo)
-        btnConfirmar.addEventListener('click', () => {
-            alert('Responsable asignado');
+        btnConfirmarAsignacion.addEventListener('click', async () => {
+            const checkboxes = $all(".usuario-checkbox")
+            await registrarResponsable()
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            // Limpiar la lista de responsables asignados
+            responsables_asignados_lista = [];
+            estadoBotonConfirmarAsignacion()
+            //alert('Responsable asignado');
             modalOverlay.classList.remove('active');
             setTimeout(() => {
                 modalOverlay.style.display = 'none';
             }, 400);
+
+
         });
-        
+
+        async function registrarResponsablesAsignados(idresponsable) {
+            console.log("ID ODT A ASIGNARLE: ", window.localStorage.getItem("idodt"))
+            const formResponsableAsignado = new FormData()
+            formResponsableAsignado.append("idorden_trabajo", window.localStorage.getItem("idodt"))
+            formResponsableAsignado.append("idresponsable", idresponsable)
+            const fresponsableId = await fetch(`/usuario/usuarios/responsablesasignados/registrar`, { method: 'POST', body: formResponsableAsignado })
+            const responsableId = fresponsableId.json()
+            return responsableId
+        }
+
+        async function registrarResponsable() {
+            const chkboxesMarcados = $all(".usuario-checkbox:checked");
+            chkboxesMarcados.forEach(chkbox => {
+                responsables_asignados_lista.push(chkbox.value)
+            })
+
+            console.log('Responsables asignados:', responsables_asignados_lista);
+            // EL ID RESPONSABLE SE REFIERE AL IDUSUARIO , osea son lo mismo solo que yo le puse diferente nombre por tabla
+            if (responsables_asignados_lista.length > 0) {
+                for (let i = 0; i < responsables_asignados_lista.length; i++) {
+                    const responsableId = await registrarResponsablesAsignados(responsables_asignados_lista[i]);
+                    console.log("responsableId: ", responsableId)
+                    const usuarioData = await obtenerUsuario(responsables_asignados_lista[i])
+                    console.log(usuarioData)
+                    listResponsablesAsignados.innerHTML += `
+                        <li data-id=${responsableId} data-idresponsable=${usuarioData[0].idusuario}>  
+                            ${usuarioData[0].usuario}
+                            <button class="btn-eliminar-responsable" data-id=${responsableId} data-idresponsable=${usuarioData[0].idusuario}>Eliminar</button>
+                        </li>
+                    `
+                }
+                colResponsablesOk = true
+                await crearOdt() // UNA VEZ TENIENDO RESPONSABLES ASIGNADOS podremos finalizar el registro de la ODT
+                await eliminarLiResponsable()
+            }
+        }
+
+        async function obtenerUsuario(idusuario) {
+            const fUsuario = await fetch(`/transparenciawsrest/consulta/usuario/${idusuario}`, { method: 'GET' })
+            const usuarioData = await fUsuario.json()
+            return usuarioData
+        }
+
         async function obtenerUsuarios() {
-            const fUsuarios = await fetch(`/transparenciawsrest/consulta/usuarios/data` , {method:'GET'})
+            const fUsuarios = await fetch(`/transparenciawsrest/consulta/usuarios/data`, { method: 'GET' })
             const usuarios = fUsuarios.json()
             return usuarios
         } //TERMINADO
 
-        async function asignarResponsable() {
-            const formResponsable = new FormData()
-            formResponsable.append("idorden_trabajo", window.localStorage.getItem("idodt"))
-            formResponsable.append("idresponsable", "")
-            const fresponsableId = await fetch(`/usuarios/responsablesasignados/registrar`, {method:'POST',body:{}})
-            const responsableId = fresponsableId.json()
-            return responsableId
-        } //PENDIENTE
+        async function obtenerResponsablesPorOdt(idorden_trabajo) {
+            const fResponsables = await fetch(`/transparenciawsrest/consulta/responsables/${idorden_trabajo}`, { method: 'GET' })
+            const responsablesData = fResponsables.json()
+            return responsablesData
+        }
+
+        async function renderResponsablesOdt() {
+            const responsablesData = await obtenerResponsablesPorOdt(window.localStorage.getItem("idodt"))
+            console.log("responsablesData: ", responsablesData)
+            for (let i = 0; i < responsablesData.length; i++) {
+                listResponsablesAsignados.innerHTML += `
+                    <li data-id=${responsablesData[i].idresponsable_asignado} data-idresponsable=${responsablesData[i].idresponsable}>
+                        ${responsablesData[i].usuario}
+                        <button class="btn-eliminar-responsable" data-id=${responsablesData[i].idresponsable_asignado} data-idresponsable=${responsablesData[0].idresponsable}>Eliminar</button>
+                    </li>
+                `
+            }
+            if (responsablesData.length > 0) {
+                alert("SI HAY RESPONSABLES")
+                colResponsablesOk = true
+            }
+            await crearOdt()
+            await eliminarLiResponsable()
+        }
+
+        async function eliminarLiResponsable() {
+            let eliminado = false;
+            const botonesEliminarResponsable = $all(".btn-eliminar-responsable");
+            botonesEliminarResponsable.forEach(boton => {
+                boton.addEventListener('click', async (event) => {
+                    const idresponsable = event.target.getAttribute("data-id");
+                    //alert(idresponsable) DEPURAR CUANDO SEA NECESARIO
+                    eliminado = await eliminarResponsablesOdt(idresponsable);
+                    if (!eliminado) {
+                        alert("OCURRIO UN ERROR AL ELIMINAR RESPONSABLE")
+                    }
+                    responsables_asignados_lista = responsables_asignados_lista.filter(id => id !== idresponsable);
+                    // Actualizar el DOM eliminando el elemento <li>
+                    const listItem = document.querySelector(`li[data-id="${idresponsable}"]`);
+                    if (listItem) {
+                        listItem.remove();
+                    }
+                    //VERIFICAR SI HAY AUN RESPONSABLES ASIGNADOS REGISTRADOS 
+                    const responsablesData = await obtenerResponsablesPorOdt(window.localStorage.getItem("idodt"))
+                    console.log("responsablesData: ", responsablesData)
+
+                    if (responsablesData.length > 0) {
+                        colResponsablesOk = true
+                    } else {
+                        btnCrearOdt.disabled = true
+                    }
+
+                });
+            });
+        }
+
+        async function eliminarResponsablesOdt(idresponsableasignado) {
+            const fResEliminacion = await fetch(`/usuario/tareas/plantareas/responsableasignado/${idresponsableasignado}`, { method: 'DELETE' })
+            const responsableEliminado = fResEliminacion.json()
+            return responsableEliminado
+        }
+
+        async function registrarDiagnosticoEntrada(formDiagnostico) {
+            const fodt = await fetch(`/usuario/odt/diagnostico/registrar`, { method: 'POST', body: formDiagnostico })
+            const odtreg = fodt.json()
+            return odtreg
+        }
+
+        const fileStatus = $("#file-status")
+        const evidenciasInput = $("#evidencias-img-input")
+        evidenciasInput.addEventListener('change', async (e) => {
+            const files = e.target.files; // Todos los archivos seleccionados
+            const diagnostico = $(".comment-textarea").value;
+            const idordentrabajo = window.localStorage.getItem("idodt");
+
+            if (files.length === 0) {
+                console.log("No se seleccionaron archivos, cancelando acción.");
+                return;
+            }
+
+            const formDiagnostico = new FormData();
+            formDiagnostico.append("idordentrabajo", idordentrabajo);
+            formDiagnostico.append("idtipodiagnostico", 1); // 1 = entrada, 2 = salida
+            formDiagnostico.append("diagnostico", diagnostico);
+
+            // Agregar todos los archivos al FormData
+            for (let i = 0; i < files.length; i++) {
+                formDiagnostico.append("evidencias[]", files[i]); // Append como array de evidencias
+            }
+
+            const subido = await registrarDiagnosticoEntrada(formDiagnostico)
+            console.log("subido?:", subido);
+            //iddiagnostico = 
+            if (subido) {
+                colDiagnosticoOk = true
+            }
+            renderEvidencias(e)
+            await crearOdt()
+        })
+
+        function renderEvidencias(e) {
+            const files = e.target.files;
+
+            // Clear the container first
+            previewContainer.innerHTML = '';
+
+            if (files.length > 0) {
+                // Remove the "+" icon
+                previewContainer.innerHTML += ''; // Clear the container before adding images
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const reader = new FileReader();
+
+                    reader.onload = function (event) {
+                        const figureElement = document.createElement('figure');
+                        const imgElement = document.createElement('img');
+                        imgElement.src = event.target.result;
+
+                        const figcaptionElement = document.createElement('figcaption');
+                        figcaptionElement.textContent = 'Ver todas las evidencias';
+
+                        // Añadir el event listener para abrir el modal
+                        figcaptionElement.addEventListener('click', abrirModalSidebar);
+
+                        // Añadir img y figcaption al figure
+                        figureElement.appendChild(imgElement);
+                        figureElement.appendChild(figcaptionElement);
+
+                        // Añadir figure al contenedor
+                        previewContainer.appendChild(figureElement);
+                    }
+
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        async function abrirModalSidebar() {
+            const modalSidebar = $(".modal-sidebar");
+            modalSidebar.classList.add('show'); // Añadir clase para mostrar el modal
+            console.log('Modal abierto'); // Verificar que se llama esta función
+
+            // Limpiar y rellenar el modal con las evidencias
+            const modalEvidenciasContainer = document.getElementById("modal-evidencias-container");
+            modalEvidenciasContainer.innerHTML = ''; // Limpiar el contenedor
+
+            const previewImages = document.querySelectorAll('.preview-container img');
+
+            console.log(`Número de imágenes a mostrar: ${previewImages.length}`); // Verificar cuántas imágenes se están encontrando
+            const evidenciasObtenidas = await obtenerEvidencias()
+            const evidencias = JSON.parse(evidenciasObtenidas[0].evidencias) // se parsea cuando queremos obtener la evidencia pq esta en texto
+            console.log("evidencias: ", evidencias)
+            /* previewImages.forEach(img => {
+                const imgClone = img.cloneNode(); // Clonar la imagen
+                modalEvidenciasContainer.appendChild(imgClone); // Añadir al modal
+            }); */
+
+            // Añadir event listener para cerrar el modal
+            const closeModalButton = document.getElementById("close-modal");
+            closeModalButton.addEventListener('click', cerrarModalSidebar)
+        }
+
+        function cerrarModalSidebar() {
+            const modalSidebar = document.getElementById("modal-sidebar");
+            modalSidebar.classList.remove('show'); // Remover clase para ocultar el modal
+
+        }
+
+        async function crearOdt() {
+            if (colDiagnosticoOk && colResponsablesOk) {
+                btnCrearOdt.disabled = false
+                alert("EL REGISTRO DE LA ODT HA SIDO FINALIZADA, puedes proceder a darle clikc")
+                btnCrearOdt.addEventListener("click", async () => {
+                    const datosActualizar = {
+                        idordentrabajo: window.localStorage.getItem("idodt"),
+                        borrador: 0
+                    }
+                    const fOdtActualizado = await fetch(`/usuario/tareas/odt/actualizar`, { method: 'PUT', body: JSON.stringify(datosActualizar), headers: { 'Content-Type': 'application/json' } })
+                    const estadoBorradorCambiado = fOdtActualizado.json()
+                    if (estadoBorradorCambiado) {
+                        alert("EL ODT YA  NO ES BORRADOR: ", estadoBorradorCambiado)
+                        window.location.href = '/usuario/tareas/odt'
+                    }
+                })
+            }
+        }
+
+        async function obtenerEvidencias() {
+            const fEvidencias = await fetch(`/transparenciawsrest/consulta/diagnostico/odt/${window.localStorage.getItem('idodt')}/tipodiagnostico/1`, {method: 'GET'})
+            const evidencias = await fEvidencias.json()
+            return evidencias
+        }
     })
 </script>
 {% endblock %}

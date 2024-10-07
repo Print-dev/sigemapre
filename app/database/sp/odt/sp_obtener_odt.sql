@@ -1,3 +1,5 @@
+USE SIGEMAPRE;
+
 DROP PROCEDURE IF EXISTS `obtenerTareas`
 DELIMITER //
 CREATE PROCEDURE `obtenerTareas`
@@ -46,7 +48,9 @@ END //
 
 DROP PROCEDURE IF EXISTS `obtenerTareasOdt`
 DELIMITER //
-CREATE PROCEDURE `obtenerTareasOdt` ()
+CREATE PROCEDURE `obtenerTareasOdt` (
+	IN _borrador boolean
+)
 BEGIN 
     SELECT 
         ODT.idorden_trabajo,
@@ -73,8 +77,43 @@ BEGIN
     INNER JOIN plandetareas PT ON PT.idplantarea = TAR.idplantarea
     INNER JOIN estados EST ON EST.idestado = ODT.idestado
     LEFT JOIN detalle_odt DODT ON DODT.clasificacion = EST.idestado 
+    WHERE ODT.borrador = _borrador
     GROUP BY ODT.idorden_trabajo, TAR.descripcion, TAR.fecha_inicio, TAR.fecha_vencimiento, PERCRE.nombres, PERCRE.apellidos, TAR.idtarea, ACT.descripcion, TAR.tiempo_estimado, EST.estado;
 END //
 
-select * from responsables_asignados;
-call obtenerTareasOdt;
+
+DROP PROCEDURE IF EXISTS `obtenerTareaDeOdtGenerada`
+DELIMITER //
+CREATE PROCEDURE `obtenerTareaDeOdtGenerada`
+(
+	IN _idodt INT
+)
+BEGIN 
+	SELECT 
+		ODT.idorden_trabajo,
+        PT.descripcion as plantarea,
+		TAR.descripcion as tarea,
+        TAR.idtarea as idtarea,
+        ACT.descripcion as activo,
+        TAR.tiempo_estimado as duracion
+		from odt ODT
+        INNER JOIN tareas TAR ON TAR.idtarea = ODT.idtarea
+        INNER JOIN activos_vinculados_tarea AVT ON AVT.idtarea = TAR.idtarea
+        INNER JOIN activos ACT ON ACT.idactivo = AVT.idactivo
+        INNER JOIN plandetareas PT ON PT.idplantarea = TAR.idplantarea
+        INNER JOIN usuarios USU ON USU.idusuario = ODT.creado_por
+        INNER JOIN estados EST ON EST.idestado = ODT.idestado
+        WHERE ODT.idorden_trabajo = _idodt;
+END //
+
+
+DROP PROCEDURE IF EXISTS `obtenerDiagnosticoEvidencias`
+DELIMITER //
+CREATE PROCEDURE `obtenerDiagnosticoEvidencias`
+( 
+	IN _idodt INT,
+    IN _idtipo_diagnostico INT
+)
+BEGIN
+	SELECT iddiagnostico, diagnostico, evidencias FROM diagnosticos WHERE idorden_trabajo = _idodt AND idtipo_diagnostico = _idtipo_diagnostico;
+END //

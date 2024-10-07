@@ -79,6 +79,33 @@ class UsuarioController
     $res->getBody()->write(json_encode($pt));
     return $res->withHeader('Content-Type', 'application/json');
   }
+
+  public function obtenerUsuario(Request $req, Response $res, $args)
+  {
+    $idusuario = $args["idusuario"]; // DATOS DEL POSTMAN
+
+    $pt = $this->user->obtenerUsuario(["idusuario" => $idusuario]);
+    $res->getBody()->write(json_encode($pt));
+    return $res->withHeader('Content-Type', 'application/json');
+  }
+  
+  public function obtenerResponsablesPorOdt(Request $req, Response $res, $args)
+  {
+    $idorden_trabajo = $args["idorden_trabajo"]; // DATOS DEL POSTMAN
+
+    $pt = $this->user->obtenerResponsablesPorOdt(["idorden_trabajo" => $idorden_trabajo]);
+    $res->getBody()->write(json_encode($pt));
+    return $res->withHeader('Content-Type', 'application/json');
+  }
+  
+  public function eliminarResponsableOdt(Request $req, Response $res, $args)
+  {
+    $idresponsableasignado = $args["idresponsableasignado"]; // DATOS DEL POSTMAN
+
+    $pt = $this->user->eliminarResponsableOdt(["idresponsableasignado" => $idresponsableasignado]);
+    $res->getBody()->write(json_encode($pt));
+    return $res->withHeader('Content-Type', 'application/json');
+  }
 }
 
 /* session_start();

@@ -11,6 +11,9 @@ $container = new Container();
 
 // CREAR LOS CONTENEDORES DE SERVICIO 
 
+// ASIGNAR UN CONTENEDOR PARA MI CARPETA DE IMAGENES SUBIDAS 
+$container->set('subidas', __DIR__ . '/../../public/img/subidas');
+
 $container->set('dashboard', function() {
   return Twig::create(__DIR__ . '/../../public/views/dashboard', ['cache' => false]);
 });

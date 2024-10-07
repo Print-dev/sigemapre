@@ -195,11 +195,11 @@ VALUES
 
 INSERT INTO tipo_diagnosticos (tipo_diagnostico) VALUES ('entrada'), ('salida');
 
-INSERT INTO odt (idtarea, creado_por) VALUES (2, 4); -- POR DEFECTO TRAERA EL ESTADO 'EN PROCESO'
+INSERT INTO odt (idtarea, creado_por) VALUES (2, 4); -- POR DEFECTO TRAERA EL ESTADO 'EN PROCESO' -- NECESARIO
 
 INSERT INTO diagnosticos (idorden_trabajo, idtipo_diagnostico, diagnostico, evidencias) values (1, 1, 'laptop levenmente dañada por las lluvias', '{"evidencia_1": "e1.jpg", "evidencia_2":"e2.jpg" }');
 
-INSERT INTO responsables_asignados (idorden_trabajo, idresponsable) values 
+INSERT INTO responsables_asignados (idorden_trabajo, idresponsable) values  -- NECESARIO
 	(1, 4),
     (1, 5);
     

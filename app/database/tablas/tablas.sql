@@ -176,7 +176,7 @@ CREATE TABLE diagnosticos
 	idtipo_diagnostico	int	not null,
     diagnostico			varchar(300)	not null,
     evidencias			json		not null,
-    CONSTRAINT			fk_idorden_trabajo3		foreign key (idorden_trabajo)	references odt (idorden_trabajo),
+    CONSTRAINT			fk_idorden_trabajo3		foreign key (idorden_trabajo)	references odt (idorden_trabajo) ON DELETE CASCADE,
     CONSTRAINT			fk_idtipo_diagnostico	foreign key (idtipo_diagnostico) references tipo_diagnosticos (idtipo_diagnostico)
 )ENGINE=INNODB;
 
@@ -186,7 +186,7 @@ CREATE TABLE responsables_asignados
 	idresponsable_asignado			int								auto_increment 			primary key,
 	idorden_trabajo					int not null,
     idresponsable					int	not null,
-	CONSTRAINT 	fk_idodt			foreign key (idorden_trabajo)	REFERENCES odt 			(idorden_trabajo),
+	CONSTRAINT 	fk_idodt			foreign key (idorden_trabajo)	REFERENCES odt 			(idorden_trabajo) ON DELETE CASCADE,
     CONSTRAINT	fk_idresponsable	foreign key (idresponsable) 	REFERENCES usuarios 	(idusuario)
 )ENGINE=INNODB;
 
@@ -194,7 +194,7 @@ CREATE TABLE historial_mantenimiento
 (
 	idhistorial_mant	int	auto_increment primary key,
     idorden_trabajo		int	not null,
-    CONSTRAINT			fkidorden_trabajo	FOREIGN KEY (idorden_trabajo)	REFERENCES odt (idorden_trabajo)
+    CONSTRAINT			fkidorden_trabajo	FOREIGN KEY (idorden_trabajo)	REFERENCES odt (idorden_trabajo) ON DELETE CASCADE
 )ENGINE=INNODB; 
 
 CREATE TABLE proveedores
@@ -275,7 +275,7 @@ CREATE TABLE detalle_odt
     fecha_final 		datetime	null,
     tiempo_ejecucion	time		null,
     clasificacion		int			null,
-	CONSTRAINT			fk_orden_trabajo2	foreign key (idorden_trabajo) references odt (idorden_trabajo),
+	CONSTRAINT			fk_orden_trabajo2	foreign key (idorden_trabajo) references odt (idorden_trabajo) ON DELETE CASCADE,
     CONSTRAINT			fk_clasificacion	foreign key (clasificacion) references estados (idestado)
 )ENGINE=INNODB;
 
@@ -288,7 +288,7 @@ CREATE TABLE historial_estado_odt
     comentario			text 		null,
     fecha_cambio		datetime	null default now(),
     devuelto			boolean		null,
-    CONSTRAINT 			fk_idorden_trabajo	foreign key (idorden_trabajo) references odt (idorden_trabajo),
+    CONSTRAINT 			fk_idorden_trabajo	foreign key (idorden_trabajo) references odt (idorden_trabajo) ON DELETE CASCADE,
     CONSTRAINT 			fk_idestado5		foreign key (estado_anterior) references estados (idestado),
     CONSTRAINT 			fk_idestado6		foreign key (estado_nuevo) references estados (idestado)
 )ENGINE=INNODB;

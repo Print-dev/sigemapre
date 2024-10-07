@@ -49,9 +49,23 @@ class OrdenTrabajoController
   
   public function obtenerTareasOdt(Request $req, Response $res, $args)
   {
-    $pt = $this->ordentrabajo->obtenerTareasOdt();
+    $borrador = $args['borrador'];
+    $pt = $this->ordentrabajo->obtenerTareasOdt(["borrador" => $borrador]);
     $res->getBody()->write(json_encode($pt));
     return $res->withHeader('Content-Type', 'application/json');
     
+  }
+  
+  public function actualizarBorradorOdt(Request $req, Response $res){
+    $data = $req->getParsedBody(); // DATOS DEL POSTMAN
+
+    $datosEnviar = [
+      "idordentrabajo"   => $data["idordentrabajo"],
+      "borrador"     => $data["borrador"]
+    ];
+
+    $pt = $this->ordentrabajo->actualizarBorradorOdt($datosEnviar);
+    $res->getBody()->write(json_encode($pt));
+    return $res->withHeader('Content-Type', 'application/json');
   }
 }

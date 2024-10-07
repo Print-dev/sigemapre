@@ -118,7 +118,7 @@
                             const idOdt = await registrarOdt(idtarea)
                             console.log(idOdt[0].id)
                             window.localStorage.setItem("idodt", idOdt[0].id)
-                            window.location.href = `/usuario/tareas/odt/registrar`
+                            window.location.href = `/${rol}/tareas/odt/registrar`
                         }
 
                     }
@@ -213,7 +213,7 @@
         // Renderizar las tareas en la columna "Pendientes"
         async function renderKanban() {
             const ftareas = await fetch(`/transparenciawsrest/consulta/tareas/data`, { method: 'GET' });
-            const ftareasOdt = await fetch(`/transparenciawsrest/consulta/tareasodt/data`, { method: 'GET' })
+            const ftareasOdt = await fetch(`/transparenciawsrest/consulta/tareasodt/0`, { method: 'GET' })
             const tareas = await ftareas.json();
             const tareasOdt = await ftareasOdt.json()
 
