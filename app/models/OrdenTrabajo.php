@@ -77,4 +77,17 @@ class OrdenTrabajo extends ExecQuery
         }
     }
     
+    public function eliminarOdt($params = []): bool
+    {
+        try {
+            $status = false;
+            $cmd = parent::execQ("CALL eliminarOdt(?)");
+            $status = $cmd->execute(array(
+                $params['idordentrabajo']
+            ));
+            return $status;
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+    }
 }

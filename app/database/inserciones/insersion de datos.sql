@@ -174,15 +174,15 @@ VALUES
 (3, 200, 50, 0, 10, 1);-- Cemento
 
 
-INSERT INTO recursos_vinculados_tarea (idrecurso, idtarea, cantidad)
-VALUES 
-(4, 1, 1),
-(5, 1, 1);  -- Taladro vinculado a la tarea 1
+-- INSERT INTO recursos_vinculados_tarea (idrecurso, idtarea, cantidad)
+-- VALUES 
+-- (4, 1, 1),
+-- (5, 1, 1);  -- Taladro vinculado a la tarea 1
 
-INSERT INTO activos_vinculados_tarea (idactivo, idtarea)
-VALUES 
-(1, 2),  -- Activo 1 vinculado a la tarea 1
-(2, 1);  -- Activo 2 vinculado a la tarea 1
+-- INSERT INTO activos_vinculados_tarea (idactivo, idtarea)
+-- VALUES 
+-- (1, 2),  -- Activo 1 vinculado a la tarea 1
+-- (2, 1);  -- Activo 2 vinculado a la tarea 1
 
 
 
@@ -195,15 +195,17 @@ VALUES
 
 INSERT INTO tipo_diagnosticos (tipo_diagnostico) VALUES ('entrada'), ('salida');
 
-INSERT INTO odt (idtarea, creado_por) VALUES (2, 4); -- POR DEFECTO TRAERA EL ESTADO 'EN PROCESO' -- NECESARIO
+-- INSERT INTO odt (idtarea, creado_por) VALUES (2, 4); -- POR DEFECTO TRAERA EL ESTADO 'EN PROCESO' -- NECESARIO
 
-INSERT INTO diagnosticos (idorden_trabajo, idtipo_diagnostico, diagnostico, evidencias) values (1, 1, 'laptop levenmente dañada por las lluvias', '{"evidencia_1": "e1.jpg", "evidencia_2":"e2.jpg" }');
-
-INSERT INTO responsables_asignados (idorden_trabajo, idresponsable) values  -- NECESARIO
-	(1, 4),
-    (1, 5);
+-- INSERT INTO diagnosticos (idorden_trabajo, idtipo_diagnostico, diagnostico) values (1, 1, 'laptop levenmente dañada por las lluvias');
+-- INSERT INTO evidencias_diagnostico (iddiagnostico, evidencia) values (1, 'yo.jpg');
+-- DELETE FROM plandetareas where idplantarea = 1;
+-- select * from plandetareas;
+-- INSERT INTO responsables_asignados (idorden_trabajo, idresponsable) values  -- NECESARIO
+	-- (1, 4),
+    -- (1, 5);
     
-INSERT INTO historial_estado_odt (idorden_trabajo, estado_nuevo, comentario) values (1, 2, 'esto apenas sea mediodia');
+-- INSERT INTO historial_estado_odt (idorden_trabajo, estado_nuevo, comentario) values (1, 2, 'esto apenas sea mediodia');
 
 -- AQUI TERMINA
 

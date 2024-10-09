@@ -19,17 +19,43 @@ DROP PROCEDURE IF EXISTS `registrarDiagnostico`
 DELIMITER //
 CREATE PROCEDURE `registrarDiagnostico`
 (
+	OUT _iddiagnostico INT,
 	IN _idorden_trabajo INT,
     IN _idtipo_diagnostico INT,
-    IN _diagnostico VARCHAR(300),
-    IN _evidencias JSON
+    IN _diagnostico VARCHAR(300)
 )
 BEGIN
-	INSERT INTO diagnosticos (idorden_trabajo, idtipo_diagnostico, diagnostico, evidencias)
-		VALUES (_idorden_trabajo, _idtipo_diagnostico, _diagnostico, _evidencias);
+	-- Declaracion de variables
+	DECLARE existe_error INT DEFAULT 0;
+    
+    -- Manejador de excepciones
+	DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+		BEGIN
+        SET existe_error = 1;
+        END;
+        
+	INSERT INTO diagnosticos (idorden_trabajo, idtipo_diagnostico, diagnostico)
+		VALUES (_idorden_trabajo, _idtipo_diagnostico, _diagnostico);
+        
+	IF existe_error = 1 THEN
+		SET _iddiagnostico = -1;
+	ELSE
+        SET _iddiagnostico = LAST_INSERT_ID();
+    END IF;
 END //
 
-CALL registrarDiagnostico(20,1,'desde mysql', '{"e1":"img.jpg","e2":"img2.jpg", "e3":"img3.jpg"}')
+DROP PROCEDURE IF EXISTS `registrarEvidenciaDiagnostico`
+DELIMITER //
+CREATE PROCEDURE `registrarEvidenciaDiagnostico`
+(
+	IN _iddiagnostico INT,
+    IN _evidencia VARCHAR(100)
+)
+BEGIN
+	INSERT INTO evidencias_diagnostico (iddiagnostico, evidencia)
+		VALUES (_iddiagnostico, _evidencia);
+END //
+
 
 DROP PROCEDURE IF EXISTS `asignarResponsablesODT`
 DELIMITER //

@@ -68,4 +68,13 @@ class OrdenTrabajoController
     $res->getBody()->write(json_encode($pt));
     return $res->withHeader('Content-Type', 'application/json');
   }
+  
+  public function eliminarOdt(Request $req, Response $res, $args)
+  {
+    $idordentrabajo = $args['idordentrabajo'];
+    $pt = $this->ordentrabajo->eliminarOdt(["idordentrabajo" => $idordentrabajo]);
+    $res->getBody()->write(json_encode($pt));
+    return $res->withHeader('Content-Type', 'application/json');
+    
+  }
 }

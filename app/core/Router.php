@@ -117,6 +117,7 @@ $app->group('/usuario', function ($group) {
   $group->post('/tareas/plantareas/activosvinculados/registrar', [ActivosvinculadosController::class, 'insertarActivoPorTarea']);
   $group->post('/usuarios/responsablesasignados/registrar', [UsuarioController::class, 'asignarResponsables']);
   $group->post('/odt/diagnostico/registrar', [DiagnosticoController::class, 'registrarDiagnostico']);
+  $group->post('/odt/diagnostico/evidencia/registrar', [DiagnosticoController::class, 'registrarEvidenciaDiagnostico']);
   
   
   //RUTAS DE INSERCION - ODT
@@ -133,6 +134,7 @@ $app->group('/usuario', function ($group) {
   $group->delete('/tareas/plantareas/recursosvinculados/{idrecursovinculado}', [RecursosvinculadosController::class, 'eliminarRecursosVinculadosTarea']);
   $group->delete('/tareas/plantareas/activosvinculados/{idactivovinculado}', [ActivosvinculadosController::class, 'eliminarActivosVinculadosTarea']);
   $group->delete('/tareas/plantareas/responsableasignado/{idresponsableasignado}', [UsuarioController::class, 'eliminarResponsableOdt']);
+  $group->delete('/tareas/odt/{idordentrabajo}', [OrdenTrabajoController::class, 'eliminarOdt']);
 
   
   //RUTAS USUARIOS
@@ -235,7 +237,8 @@ $app->get('/transparenciawsrest/consulta/tareas/data', [TareasController::class,
 $app->get('/transparenciawsrest/consulta/tareaodt/{idodt}', [OrdenTrabajoController::class, 'obtenerTareaDeOdtGenerada']);
 $app->get('/transparenciawsrest/consulta/tarea/verificar/data', [OrdenTrabajoController::class, 'verificarTareaInconclusa']);
 $app->get('/transparenciawsrest/consulta/tareasodt/{borrador}', [OrdenTrabajoController::class, 'obtenerTareasOdt']);
-$app->get('/transparenciawsrest/consulta/diagnostico/odt/{idodt}/tipodiagnostico/{idtipodiagnostico}', [DiagnosticoController::class, 'obtenerDiagnosticoEvidencias']);
+$app->get('/transparenciawsrest/consulta/evidencias/diagnostico/{iddiagnostico}', [DiagnosticoController::class, 'obtenerEvidenciasDiagnostico']);
+
 
 
 

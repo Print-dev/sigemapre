@@ -11,36 +11,49 @@ class Diagnostico extends ExecQuery
 
   // FUTUROS METODOS
 
-  public function registrarDiagnostico($params = []): bool
+  public function registrarDiagnostico($params = []): int
   {
     try {
-      $status = false;
-      $sp = parent::execQ("CALL registrarDiagnostico(?,?,?,?)");
-      $status = $sp->execute(
+      $sp = parent::execQ("CALL registrarDiagnostico(@iddiagnostico,?,?,?)");
+      $sp->execute(
         array(
           $params['idordentrabajo'],
           $params['idtipodiagnostico'],
           $params['diagnostico'],
-          $params['evidencias']
         )
       );
-      return $status;
+      $response = parent::execQuerySimple("SELECT @iddiagnostico as iddiagnostico")->fetch(\PDO::FETCH_ASSOC);
+      return (int) $response['iddiagnostico'];
     } catch (\Exception $e) {
       die($e->getMessage());
     }
   }
 
-  public function obtenerDiagnosticoEvidencias($params = []): array
+  public function registrarEvidenciaDiagnostico($params = []): bool
   {
     try {
-      $sp = parent::execQ("CALL obtenerDiagnosticoEvidencias(?,?)");
-      $sp->execute(array(
-        $params['idodt'],
-        $params['idtipodiagnostico']
+      $status = false;
+      $sp = parent::execQ("CALL registrarEvidenciaDiagnostico(?,?)");
+      $status = $sp->execute(array(
+        $params['iddiagnostico'],
+        $params['evidencia']
       ));
-      return $sp->fetchAll(\PDO::FETCH_ASSOC);
+      return $status;
     } catch (\Exception $e) {
       die($e->getMessage());
     }
   }
+  
+  public function obtenerEvidenciasDiagnostico($params = []): array
+  {
+    try {
+      $sp = parent::execQ("CALL obtenerEvidenciasDiagnostico(?)");
+      $sp->execute(array(
+        $params['iddiagnostico']
+      ));
+    } catch (\Exception $e) {
+      return $sp->fetchAll(\PDO::FETCH_ASSOC);
+      die($e->getMessage());
+    }
+  } // ME QUEDE ACA
 }

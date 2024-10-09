@@ -175,10 +175,17 @@ CREATE TABLE diagnosticos
     idorden_trabajo		int	not null,
 	idtipo_diagnostico	int	not null,
     diagnostico			varchar(300)	not null,
-    evidencias			json		not null,
     CONSTRAINT			fk_idorden_trabajo3		foreign key (idorden_trabajo)	references odt (idorden_trabajo) ON DELETE CASCADE,
     CONSTRAINT			fk_idtipo_diagnostico	foreign key (idtipo_diagnostico) references tipo_diagnosticos (idtipo_diagnostico)
 )ENGINE=INNODB;
+
+CREATE TABLE evidencias_diagnostico
+(
+	idevidencias_diagnostico	int	auto_increment primary key,
+    iddiagnostico				int not null,
+    evidencia					varchar(100)	not null,
+	CONSTRAINT 					fk_iddiagnostico	foreign key (iddiagnostico) references diagnosticos (iddiagnostico) ON DELETE CASCADE
+)ENGINE=INNODB;	
 
 
 CREATE TABLE responsables_asignados
@@ -216,6 +223,7 @@ CREATE TABLE recursos
     update_at			datetime		null,
     CONSTRAINT			fk_idcategoria_recurso2 foreign key (idcategoria) references categorias (idcategoria) ON DELETE CASCADE
 )ENGINE=INNODB;
+
 
 CREATE TABLE proveedores_vinculados_recurso
 (

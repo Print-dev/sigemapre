@@ -28,7 +28,7 @@ body {
   transition: width 0.3s ease;
 }
 
-.sidebar.minimized {
+/* .sidebar.minimized {
   width: 60px;
 }
 
@@ -50,7 +50,7 @@ body {
 .menu .sub-menu-activos,
 .menu .sub-menu-tareas,
 .menu .sub-menu-usuarios {
-  display: none; /* Oculta los submenús por defecto */
+  display: none; 
   margin-left: 20px;
   padding-left: 20px;
   padding-top: 5px;
@@ -58,8 +58,8 @@ body {
 }
 
 .menu .sub-menu-active {
-  display: block; /* Muestra el submenú cuando está activo */
-}
+  display: block;
+} */
 
 .sidebar .head {
   display: flex;
