@@ -107,13 +107,12 @@ BEGIN
 END //
 
 
-DROP PROCEDURE IF EXISTS `obtenerDiagnosticoEvidencias`
+DROP PROCEDURE IF EXISTS `obtenerEvidenciasDiagnostico`
 DELIMITER //
-CREATE PROCEDURE `obtenerDiagnosticoEvidencias`
+CREATE PROCEDURE `obtenerEvidenciasDiagnostico`
 ( 
-	IN _idodt INT,
-    IN _idtipo_diagnostico INT
+	IN _iddiagnostico INT
 )
 BEGIN
-	SELECT iddiagnostico, diagnostico, evidencias FROM diagnosticos WHERE idorden_trabajo = _idodt AND idtipo_diagnostico = _idtipo_diagnostico;
+	SELECT * FROM evidencias_diagnostico WHERE iddiagnostico = _iddiagnostico;
 END //
