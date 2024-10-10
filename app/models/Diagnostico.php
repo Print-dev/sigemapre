@@ -51,8 +51,9 @@ class Diagnostico extends ExecQuery
       $sp->execute(array(
         $params['iddiagnostico']
       ));
-    } catch (\Exception $e) {
       return $sp->fetchAll(\PDO::FETCH_ASSOC);
+
+    } catch (\Exception $e) {
       die($e->getMessage());
     }
   } // ME QUEDE ACA

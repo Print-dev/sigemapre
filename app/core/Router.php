@@ -127,6 +127,8 @@ $app->group('/usuario', function ($group) {
   $group->put('/tareas/plantareas/recursosvinculados/actualizar', [RecursosvinculadosController::class, 'actualizarRecursoPorTarea']);  
   $group->put('/tareas/plantareas/actualizar', [PlandetareasController::class, 'actualizarPlanDeTareas']);
   $group->put('/tareas/odt/actualizar', [OrdenTrabajoController::class, 'actualizarBorradorOdt']);
+  $group->put('/tareas/estado/actualizar', [TareasController::class, 'actualizarTareaEstado']);
+
   
   //RUTAS DE ELIMINACION
   $group->delete('/tareas/plantareas/plantarea/{idplantarea}', [PlandetareasController::class, 'eliminarPlanDeTarea']);

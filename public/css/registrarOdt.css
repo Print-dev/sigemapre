@@ -409,3 +409,13 @@ h2 {
     color: #000; /* Color del texto */
     float: right; /* Alinear a la derecha */
 }
+
+.modal-img{
+    width: 200px;
+    height: 180px;
+}
+
+.modal-img:hover{
+    transform: scale(1); /* Inicialmente pequeño */
+    transition: transform 0.4s ease;
+}

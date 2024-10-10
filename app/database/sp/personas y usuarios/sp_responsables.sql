@@ -17,7 +17,7 @@ BEGIN
 		BEGIN
         SET existe_error = 1;
         END;
-	INSERT INTO responsables_asignados (idorden_trabajo, idresponsable) values
+	INSERT INTO responsables_asignados_odt (idorden_trabajo, idresponsable) values
 		(_idorden_trabajo, _idresponsable);
         
 	IF existe_error = 1 THEN
@@ -27,7 +27,7 @@ BEGIN
     END IF;
 END
 
-select * from responsables_asignados;
+select * from responsables_asignados_odt;
 
 DROP PROCEDURE IF EXISTS `obtenerUsuario`
 DELIMITER //
@@ -49,12 +49,12 @@ BEGIN
 	SELECT 
 		RA.idresponsable_asignado, RA.idorden_trabajo, RA.idresponsable,
         USU.usuario
-		FROM responsables_asignados RA
+		FROM responsables_asignados_odt RA
 	INNER JOIN usuarios USU ON USU.idusuario = RA.idresponsable
     WHERE idorden_trabajo = _idorden_trabajo;
 END //
 
-select * from responsables_asignados;
+select * from responsables_asignados_odt;
 
 DROP PROCEDURE IF EXISTS `eliminarResponsableOdt`
 DELIMITER //
@@ -63,7 +63,7 @@ CREATE PROCEDURE `eliminarResponsableOdt`
 	IN _idresponsable_asignado INT
 )
 BEGIN
-	DELETE FROM responsables_asignados WHERE idresponsable_asignado = _idresponsable_asignado;
+	DELETE FROM responsables_asignados_odt WHERE idresponsable_asignado = _idresponsable_asignado;
 END //
 
 CALL eliminarResponsableOdt(19);

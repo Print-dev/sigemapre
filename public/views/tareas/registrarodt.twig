@@ -30,7 +30,8 @@
         </div>
         <div class="contenedor-responsables">
             <h2>Asignar Responsables</h2>
-            <button id="btnAsignarResponsable">Asignar Responsable</button>
+            <button class="btn btn-primary" type="button" id="btnAsignarResponsable" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasRightResponsables" aria-controls="offcanvasRightResponsables">Asignar Responsable</button>
             <div class="contenedor-responsables-asignados">
                 <ul>
                 </ul>
@@ -40,39 +41,37 @@
     <button id="btnCrearOdt" disabled>Crear Odt</button>
     <!-- Modal -->
     <!-- Estructura del modal con cabecera, cuerpo y pie -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-content">
-            <!-- Cabecera del modal -->
-            <div class="modal-header">
-                <h3>Asignar un responsable</h3>
-                <button class="close-btn" id="closeModalBtn">X</button>
-            </div>
-            <!-- Cuerpo del modal -->
-            <div class="modal-body">
-                <p>Usuarios disponibles.</p>
-                <table class="tUsuarios">
-                    <thead>
-                        <th>#</th>
-                        <th>Usuario</th>
-                        <th>Estado</th>
-                        <th>Rol</th>
-                    </thead>
-                    <tbody class="tbodyUsuarios">
 
-                    </tbody>
-                </table>
-                <!-- Aquí iría un formulario o selección de usuarios -->
-            </div>
-            <!-- Pie del modal -->
-            <div class="modal-footer">
-                <button id="btnConfirmarAsignacion" disabled>Confirmaraaa</button>
-            </div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRightResponsables" aria-labelledby="offcanvasRightResponsablesLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightResponsablesLabel">Offcanvas right</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <h3>Asignar un responsable</h3>
+            <p>Usuarios disponibles.</p>
+            <table class="tUsuarios">
+                <thead>
+                    <th>#</th>
+                    <th>Usuario</th>
+                    <th>Estado</th>
+                    <th>Rol</th>
+                </thead>
+                <tbody class="tbodyUsuarios">
+
+                </tbody>
+                <button id="btnConfirmarAsignacion" disabled>Confirmar</button>
+            </table>
         </div>
     </div>
-    <!-- INICIO MODAL SIDEBAR DERECHO -->
-    <div id="modal-sidebar" class="modal-sidebar">
-        <div class="contenido-modal"> <!--   QUITAR ESTE DIV -->
-            <span id="close-modal" class="close">&times;</span>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRightEvidencias"
+        aria-labelledby="offcanvasRightEvidenciasLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightEvidenciasLabel">Offcanvas right</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
             <h2>Lista de todas las evidencias</h2>
             <div id="modal-evidencias-container">
                 <!-- Aquí se agregarán las evidencias -->
@@ -80,6 +79,7 @@
             </div>
         </div>
     </div>
+
 </main>
 {% endblock %}
 
@@ -179,10 +179,7 @@
                             ${recursosHTML}
                         </ul> 
                     </div>  
-                    <div class="contenedor-comentario">
-                        <h2>Comentario (opcional)</h2>
-                        <textarea class="comment-textarea" placeholder="Escribe tu comentario aquí..."></textarea>
-                    </div>                     
+                                     
                 `;
             });
         }
@@ -208,25 +205,7 @@
 
         // ESPACIO PARA CREAR LA ACCION DE ABRIR Y CERRAR MODELO
         const btnAbrirModal = $('#btnAsignarResponsable');
-        const modalOverlay = $('#modalOverlay');
-        const closeModalBtn = $('#closeModalBtn');
         const btnConfirmarAsignacion = $('#btnConfirmarAsignacion');
-
-        // Función para abrir el modal con la animación de fade-in
-        btnAbrirModal.addEventListener('click', () => {
-            modalOverlay.style.display = 'flex'; // Mostrar el overlay
-            setTimeout(() => {
-                modalOverlay.classList.add('active'); // Activar la animación de fade y expandir el modal
-            }, 10); // Pequeño delay para que la transición funcione
-        });
-
-        // Función para cerrar el modal con la animación de fade-out
-        closeModalBtn.addEventListener('click', () => {
-            modalOverlay.classList.remove('active'); // Eliminar la clase activa
-            setTimeout(() => {
-                modalOverlay.style.display = 'none'; // Ocultar el overlay completamente después de la animación
-            }, 400); // Esperar el tiempo de la transición para ocultar
-        });
 
         // Acción en el botón de Confirmar (solo como ejemplo)
         btnConfirmarAsignacion.addEventListener('click', async () => {
@@ -239,13 +218,6 @@
             // Limpiar la lista de responsables asignados
             responsables_asignados_lista = [];
             estadoBotonConfirmarAsignacion()
-            //alert('Responsable asignado');
-            modalOverlay.classList.remove('active');
-            setTimeout(() => {
-                modalOverlay.style.display = 'none';
-            }, 400);
-
-
         });
 
         async function registrarResponsablesAsignados(idresponsable) {
@@ -437,7 +409,10 @@
                         figcaptionElement.textContent = 'Ver todas las evidencias';
 
                         // Añadir el event listener para abrir el modal
-                        figcaptionElement.addEventListener('click', abrirModalSidebar);
+                        figcaptionElement.addEventListener('click', function () {
+                            abrirModalSidebar('offcanvasRightEvidencias');
+                        });
+
 
                         // Añadir img y figcaption al figure
                         figureElement.appendChild(imgElement);
@@ -452,10 +427,12 @@
             }
         }
 
-        async function abrirModalSidebar() {
-            const modalSidebar = $(".modal-sidebar");
-            modalSidebar.classList.add('show'); // Mostrar el modal
-            console.log('Modal abierto'); // Confirmar que la función se llama
+        async function abrirModalSidebar(modalId) {
+            const modalSidebar = document.getElementById(modalId); // Obtener el modal por ID
+            const bsOffcanvas = new bootstrap.Offcanvas(modalSidebar); // Usar Bootstrap Offcanvas API
+            bsOffcanvas.show(); // Mostrar el modal
+
+            console.log('Modal abierto: ' + modalId); // Confirmar que la función se llama
 
             // Limpiar y rellenar el modal con las evidencias
             const modalEvidenciasContainer = document.getElementById("modal-evidencias-container");
@@ -463,38 +440,21 @@
 
             // Obtener evidencias desde la API o fuente de datos
             const evidenciasObtenidas = await obtenerEvidencias(iddiagnosticoGenerado);
-            console.log(evidenciasObtenidas);
+            console.log("Evidencias obtenidas: ", evidenciasObtenidas);
 
-            // Verificar que se obtuvieron evidencias
-            if (evidenciasObtenidas.length > 0) {
-                const evidencias = JSON.parse(evidenciasObtenidas[0].evidencias); // Parsear la evidencia
+            // Iterar sobre cada evidencia y crear elementos de imagen
+            evidenciasObtenidas.forEach(evidenciaObj => {
+                const imgSrc = evidenciaObj.evidencia; // Acceder a la propiedad 'evidencia' del objeto
+                const imgElement = document.createElement('img');
+                imgElement.src = `http://localhost/img/subidas/${imgSrc}`; // Ajustar la ruta a la imagen
+                imgElement.alt = `Evidencia ${imgSrc}`;
+                imgElement.classList.add('modal-img'); // Añadir clase para estilo (opcional)
 
-                console.log("Evidencias: ", evidencias);
-
-                // Iterar sobre cada evidencia y crear elementos de imagen
-                for (const key in evidencias) {
-                    if (evidencias.hasOwnProperty(key)) {
-                        const imgSrc = evidencias[key]; // Obtener la fuente de la imagen
-                        const imgElement = document.createElement('img');
-                        imgElement.src = `http://localhost/img/subidas/${imgSrc}`; // Ajustar la ruta a la imagen
-                        imgElement.alt = `Evidencia ${key}`;
-                        imgElement.classList.add('modal-img'); // Añadir clase para estilo (opcional)
-
-                        // Añadir la imagen al contenedor del modal
-                        modalEvidenciasContainer.appendChild(imgElement);
-                    }
-                }
-            } else {
-                // Si no hay evidencias, mostrar un mensaje o similar
-                const noEvidenciasMessage = document.createElement('p');
-                noEvidenciasMessage.textContent = "No hay evidencias para mostrar.";
-                modalEvidenciasContainer.appendChild(noEvidenciasMessage);
-            }
-
-            // Añadir event listener para cerrar el modal
-            const closeModalButton = document.getElementById("close-modal");
-            closeModalButton.addEventListener('click', cerrarModalSidebar);
+                // Añadir la imagen al contenedor del modal
+                modalEvidenciasContainer.appendChild(imgElement);
+            });
         }
+
 
 
         function cerrarModalSidebar() {
@@ -516,6 +476,7 @@
                     const fOdtActualizado = await fetch(`/usuario/tareas/odt/actualizar`, { method: 'PUT', body: JSON.stringify(datosActualizar), headers: { 'Content-Type': 'application/json' } })
                     const estadoBorradorCambiado = fOdtActualizado.json()
                     window.localStorage.removeItem("idodt") //esto lo borrare para cuando se intente regresar no se pueda modificar ocasionando confusiones y bugs
+                    await actualizarEstadoTarea()
                     if (estadoBorradorCambiado) {
                         alert("EL ODT YA  NO ES BORRADOR: ", estadoBorradorCambiado)
                         window.location.href = '/usuario/tareas/odt'
@@ -558,6 +519,20 @@
             return borrado
         }
 
+        async function actualizarEstadoTarea() {
+            const datosActualizar = {
+                idtarea: window.localStorage.getItem('idtarea'),
+                idestado: 2
+            }
+            const FestadoTareaCambiada = await fetch(`/usuario/tareas/estado/actualizar`, { method: 'PUT', body: JSON.stringify(datosActualizar), headers: { 'Content-Type': 'application/json' } })
+            const estadoCambiado = await FestadoTareaCambiada.json()
+            return estadoCambiado
+        }
+
     })
 </script>
+<!--  <div class="contenedor-comentario">
+                        <h2>Comentario (opcional)</h2>
+                        <textarea class="comment-textarea" placeholder="Escribe tu comentario aquí..."></textarea>
+                    </div>    -->
 {% endblock %}

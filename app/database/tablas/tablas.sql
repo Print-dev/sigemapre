@@ -80,18 +80,18 @@ CREATE TABLE marcas
 
 -- ROYER TABLAS ******************************
 
-CREATE TABLE tipo_estados
-(
-	idtipo_estado	int	auto_increment primary key,
-    tipo_estado		varchar(30)
-)ENGINE=INNODB;
+-- CREATE TABLE tipo_estados
+-- (
+-- idtipo_estado	int	auto_increment primary key,
+--    tipo_estado		varchar(30)
+-- )ENGINE=INNODB;
 
 CREATE TABLE estados
 (
 	idestado		int	auto_increment primary key,
-    idtipo_estado	int	not null,
-    estado			varchar(30),
-	constraint fkidtipo_estado	foreign key (idtipo_estado) references tipo_estados (idtipo_estado)
+--    idtipo_estado	int	not null,
+    estado			varchar(30)
+	-- constraint fkidtipo_estado	foreign key (idtipo_estado) references tipo_estados (idtipo_estado)
 )ENGINE=INNODB;
 
 
@@ -188,7 +188,7 @@ CREATE TABLE evidencias_diagnostico
 )ENGINE=INNODB;	
 
 
-CREATE TABLE responsables_asignados
+CREATE TABLE responsables_asignados_odt
 (
 	idresponsable_asignado			int								auto_increment 			primary key,
 	idorden_trabajo					int not null,
@@ -196,13 +196,6 @@ CREATE TABLE responsables_asignados
 	CONSTRAINT 	fk_idodt			foreign key (idorden_trabajo)	REFERENCES odt 			(idorden_trabajo) ON DELETE CASCADE,
     CONSTRAINT	fk_idresponsable	foreign key (idresponsable) 	REFERENCES usuarios 	(idusuario)
 )ENGINE=INNODB;
-
-CREATE TABLE historial_mantenimiento
-(
-	idhistorial_mant	int	auto_increment primary key,
-    idorden_trabajo		int	not null,
-    CONSTRAINT			fkidorden_trabajo	FOREIGN KEY (idorden_trabajo)	REFERENCES odt (idorden_trabajo) ON DELETE CASCADE
-)ENGINE=INNODB; 
 
 CREATE TABLE proveedores
 (

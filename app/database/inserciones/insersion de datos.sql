@@ -74,29 +74,28 @@ INSERT INTO marcas(marca)
 
 
 -- INSERCIONES ROYER
-INSERT INTO tipo_estados (tipo_estado) values ('odt'),('activo'),('solicitud'),('responsable'),('recurso'),('tarea'),('detalle_odt'),('usuario');
-INSERT INTO estados (idtipo_estado, estado) values 
-		(1,'pendiente'),
-        (1,'proceso'),
-        (1,'revision'),
-        (1,'finalizado'),
-        (2,'activo'),
-        (2,'en mantenimiento'),
-        (2,'baja'),
-        (2,'en uso'),
-        (3,'en proceso'),
-        (3,'aprobado'),
-        (3,'rechazado'),
-        (4,'asignado'),
-        (4,'no asignado'),
-        (5,'disponible'),
-        (5,'agotado'),
-        (6,'sin tomar'),
-        (6,'vencido'),
-        (7,'exitoso'),
-        (7,'atrasado'),      
-        (8,'disponible'),
-        (8, 'ocupado');
+INSERT INTO estados (estado) values 
+		('pendiente'),
+        ('proceso'),
+        ('revision'),
+        ('finalizado'),
+        ('activo'),
+        ('en mantenimiento'),
+        ('baja'),
+        ('en uso'),
+        ('en proceso'),
+        ('aprobado'),
+        ('rechazado'),
+        ('asignado'),
+        ('no asignado'),
+        ('disponible'),
+        ('agotado'),
+        ('sin tomar'),
+        ('vencido'),
+        ('exitoso'),
+        ('atrasado'),      
+        ('disponible'),
+        ('ocupado');
 	
 select * from estados;
 	
@@ -186,7 +185,7 @@ VALUES
 
 
 
--- INSERT INTO responsables_asignados (idorden_trabajo, idresponsable)
+-- INSERT INTO responsables_asignados_odt (idorden_trabajo, idresponsable)
 -- VALUES 
 -- ()
 
@@ -201,7 +200,7 @@ INSERT INTO tipo_diagnosticos (tipo_diagnostico) VALUES ('entrada'), ('salida');
 -- INSERT INTO evidencias_diagnostico (iddiagnostico, evidencia) values (1, 'yo.jpg');
 -- DELETE FROM plandetareas where idplantarea = 1;
 -- select * from plandetareas;
--- INSERT INTO responsables_asignados (idorden_trabajo, idresponsable) values  -- NECESARIO
+-- INSERT INTO responsables_asignados_odt (idorden_trabajo, idresponsable) values  -- NECESARIO
 	-- (1, 4),
     -- (1, 5);
     

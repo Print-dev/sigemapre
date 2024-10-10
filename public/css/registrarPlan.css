@@ -3,3 +3,10 @@
     margin: 40px;
     margin-left: calc(256px + 30px);
 }
+
+.contenedor-info-plan{
+    display: flex;
+    justify-content: center;
+    background-color: aqua;
+}
+

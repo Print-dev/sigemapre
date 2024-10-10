@@ -104,4 +104,18 @@ class TareasController
     $res->getBody()->write(json_encode($pt));
     return $res->withHeader('Content-Type', 'application/json');
   }
+
+  public function actualizarTareaEstado(Request $req, Response $res)
+  {
+    $data = $req->getParsedBody(); // DATOS DEL POSTMAN
+
+    $datosEnviar = [
+      "idtarea"           => $data["idtarea"],
+      "idestado"  => $data['idestado']
+    ];
+
+    $pt = $this->tarea->actualizarTareaEstado($datosEnviar);
+    $res->getBody()->write(json_encode($pt));
+    return $res->withHeader('Content-Type', 'application/json');
+  }
 }

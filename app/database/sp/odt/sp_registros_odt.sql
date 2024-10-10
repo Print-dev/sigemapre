@@ -65,7 +65,7 @@ CREATE PROCEDURE `asignarResponsablesODT`
     IN _idresponsable	INT
 )
 BEGIN
-	INSERT INTO responsables_asignados (idorden_trabajo, idresponsable)
+	INSERT INTO responsables_asignados_odt (idorden_trabajo, idresponsable)
 		VALUES (_idorden_trabajo, _idresponsable);
 END //
 

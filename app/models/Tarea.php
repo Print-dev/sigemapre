@@ -102,4 +102,19 @@ class Tarea extends ExecQuery
       die($e->getMessage());
     }
   }
+  
+  public function actualizarTareaEstado($params = []): bool
+  {
+    try {
+      $status = false;
+      $sp = parent::execQ("CALL actualizarTareaEstado(?,?)");
+      $status = $sp->execute(array(
+        $params['idtarea'],
+        $params['idestado']
+      ));
+      return $status;
+    } catch (\Exception $e) {
+      die($e->getMessage());
+    }
+  }
 }

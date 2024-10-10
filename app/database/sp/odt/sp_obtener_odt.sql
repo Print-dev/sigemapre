@@ -66,7 +66,7 @@ BEGIN
         EST.estado,
         DODT.clasificacion
     FROM odt ODT
-    INNER JOIN responsables_asignados RA ON RA.idorden_trabajo = ODT.idorden_trabajo
+    INNER JOIN responsables_asignados_odt RA ON RA.idorden_trabajo = ODT.idorden_trabajo
     INNER JOIN usuarios USURES ON USURES.idusuario = RA.idresponsable
     INNER JOIN personas PERRES ON PERRES.idpersona = USURES.idpersona
     INNER JOIN usuarios USUCRE ON USUCRE.idusuario = ODT.creado_por

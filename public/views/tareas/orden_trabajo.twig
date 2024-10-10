@@ -43,6 +43,32 @@
             </div>
         </div>
     </div>
+
+    <!-- ************************************* INICIO MODAL DE REVISION  ***************************************************** -->
+    <!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRightRevision"
+        aria-labelledby="offcanvasRightRevisionLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightRevisionLabel">Revisar Orden</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" id="bodyRevision">
+
+        </div>
+    </div> -->
+    <!-- *************************************** FIN MODAL DE REVISION ******************************************************* -->
+    <!-- ************************************* INICIO MODAL DE FINALIZACION ************************************************** -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRightFinalizacion"
+        aria-labelledby="offcanvasRightFinalizacionLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightFinalizacionLabel">Finalizar orden</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" id="bodyFinalizacion">
+            <textarea name="" id="" class="w-100 form-control h-25"></textarea>
+            <p>hola</p>
+        </div>
+    </div>
+    <!--  *************************************** FIN MODAL DE FINALIZACION *************************************************** -->
 </main>
 {% endblock %}
 
@@ -106,25 +132,52 @@
                     const columna = zona.getAttribute("data-idcolumna"); // obtenemos el atributo del div de la columna "pendiente/proceso/revision/finalizada"
                     console.log("DIV columnaDestino: ", columnaDestino)
                     console.log("NOMBRE COLUMNA: ", columna)
-                    const idtarea = tareaArrastrada.getAttribute("data-idtarea");
+                    const idtarea = tareaArrastrada.getAttribute("data-idtarea"); // obtenemos el id de la tarea DEL CUAL ESTA SIENDO ARRASTRADA
                     console.log("ID de la tarea:", idtarea);
-                    if (columna === "proceso") {
-                        if (tareaArrastrada.getAttribute("estado") === "proceso") {
-                            redirigir = false
-                            return
-                        }
-                        if (redirigir) {
-                            console.log("la tarea esta ne la columan prodceso")
-                            const idOdt = await registrarOdt(idtarea)
-                            console.log(idOdt[0].id)
-                            window.localStorage.setItem("idodt", idOdt[0].id)
-                            window.location.href = `/${rol}/tareas/odt/registrar`
-                        }
+                    //ESTE SWITCH VERIFICA EN QUE DIV COLUMNA CAE LA TAREA CARD CUANDO ES ARRASTRADA
+                    switch (columna) {
+                        case "proceso": // SI CAE EN LA COLUMNA DE PROCESOS
+                            if (tareaArrastrada.getAttribute("estado") === "proceso") {
+                                redirigir = false
+                                return
+                            }
+                            if (redirigir) {
+                                console.log("la tarea esta ne la columan prodceso")
+                                const idOdt = await registrarOdt(idtarea)
+                                console.log(idOdt[0].id)
+                                window.localStorage.setItem("idtarea", idtarea)
+                                window.localStorage.setItem("idodt", idOdt[0].id)
+                                window.location.href = `/${rol}/tareas/odt/registrar`
+                            }
+                            break;
 
+                        case "revision": //SI LA CAE EN LA COLUMNA DE REVISION
+                            if (tareaArrastrada.getAttribute("estado") === "proceso") {
+                                // PROCESO DE LOGICA PARA ACTUALIZAR EL ESTADO DE LA ORDEN DE TRABAJO 'REVISION' SOLO Y CUANDO ESTE COMPLETADO                                
+                                // VERIFICAR QUE LA ORDEN YA ESTE COMPLETADA AL 100%
+                                //abrirModalSidebar("offcanvasRightRevision", "bodyRevision")
+                            }
+                        case "finalizado": // SI CAE EN LA COLUMNA FINALIZADO:
+                            if (tareaArrastrada.getAttribute("estado") === "revision") {
+                                // PROCESO DE LOGICA PARA ACTUALIZAR EL ESTADO DE LA ORDEN EN REVISION A FINALIZADO SOLO Y CUANDO ESTE COMPLETADA LA REVISION
+                                abrirModalSidebar("offcanvasRightFinalizacion", "bodyFinalizacion")
+                            }
                     }
                 }
             });
         });
+
+        async function abrirModalSidebar(modalId, bodyId) {
+            const modalSidebar = document.getElementById(modalId); // Obtener el modal por ID
+            const bsOffcanvas = new bootstrap.Offcanvas(modalSidebar); // Usar Bootstrap Offcanvas API
+            bsOffcanvas.show(); // Mostrar el modal
+
+            console.log('Modal abierto: ' + modalId); // Confirmar que la función se llama
+
+            /*             // Limpiar y rellenar el modal con las evidencias
+                        const modalEvidenciasContainer = document.getElementById(bodyId);
+                        modalEvidenciasContainer.innerHTML = ''; // Limpiar el contenedor      */
+        }
 
         async function registrarOdt(idtarea) {
             const formOdt = new FormData()
@@ -140,10 +193,10 @@
             tarea.classList.add("tarea", "tarea-odt");
 
             const uniqueCardId = `odt-card-${++cardIdCounter}`;
-            tarea.setAttribute("id", uniqueCardId);
+            tarea.setAttribute("id", uniqueCardId); //este id es auto incrementable
             tarea.setAttribute("draggable", "true");
             tarea.setAttribute("estado", tareaData.estado)
-            tarea.setAttribute("data-idtarea", tareaData.idtarea);
+            tarea.setAttribute("data-idtarea", tareaData.idtarea); // este es id de la tarea original
 
             const fechaInicio = new Date(tareaData.fecha_inicio).toLocaleDateString();
             const fechaVencimiento = new Date(tareaData.fecha_vencimiento).toLocaleDateString();
@@ -173,6 +226,12 @@
                     <p class="porcentaje-texto">${tareaData.clasificacion === 'finalizado' ? '100' : tareaData.clasificacion === 'iniciado' ? '50' : '0'}%</p>
                 </div>
             `;
+
+            tarea.addEventListener("click", ()=>{
+                window.localStorage.removeItem("idodt")
+                window.localStorage.setItem("idodt ") // COMPLETARLO DESPUES ***************************
+                window.location.href = `/${rol}/tareas/odt/registrar`
+            })
 
             return tarea;
         }
