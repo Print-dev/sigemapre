@@ -20,7 +20,6 @@ CREATE PROCEDURE actualizarTarea(
     IN _idtarea INT,
     IN _idtipo_prioridad INT,
     IN _descripcion VARCHAR(200), 
-    IN _tiempo_estimado TIME, 
     IN _fecha_inicio DATETIME,
     IN _fecha_vencimiento DATETIME, 
     IN _cant_intervalo INT, 
@@ -31,7 +30,6 @@ BEGIN
     SET 
 		idtipo_prioridad = _idtipo_prioridad,
 		descripcion = _descripcion,
-        tiempo_estimado = _tiempo_estimado, 
         fecha_inicio = _fecha_inicio,
         fecha_vencimiento = _fecha_vencimiento,
         cant_intervalo = _cant_intervalo, 

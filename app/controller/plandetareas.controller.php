@@ -28,7 +28,6 @@ class PlandetareasController{
 
     $datosEnviar = [
       "descripcion"       => $data["descripcion"],
-      "idcategoria"       => $data['idcategoria'],
       "borrador"          => $data['borrador']
     ];
 

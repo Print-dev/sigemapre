@@ -21,9 +21,9 @@ END $$
 
 -- TABLAS ESTATICAS
 -- USAR LIKE LUEGO PARA FILTRAR
+DROP PROCEDURE `obtenerRecursos`
 DELIMITER $$ 
-CREATE PROCEDURE obtenerRecursos(
-	IN _idcategoria INT
+CREATE PROCEDURE `obtenerRecursos`(
 )
 BEGIN 
 	SELECT 
@@ -32,13 +32,14 @@ BEGIN
 	INNER JOIN recursos RE ON DR.idrecurso = RE.idrecurso
 	INNER JOIN proveedores_vinculados_recurso PVR ON RE.idrecurso = PVR.idrecurso
     INNER JOIN proveedores PRO ON PVR.idproveedor = PRO.idproveedor
-    WHERE RE.idcategoria = 1 -- Filtramos por la categoría obtenida
     GROUP BY RE.idrecurso, RE.nombre, RE.costo, DR.stock_total;
 END $$
+call obtenerRecursos('le')
 -- YA EASTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 -- USAR LIKE LUEGO PARA FILTRAR
+DROP PROCEDURE IF EXISTS `obtenerActivos`
 DELIMITER $$ 
-CREATE PROCEDURE obtenerActivos(
+CREATE PROCEDURE `obtenerActivos`(
 	IN _idcategoria	INT
 )
 BEGIN
@@ -48,16 +49,12 @@ BEGIN
     INNER JOIN marcas MAR ON ACT.idmarca = MAR.idmarca
     WHERE CAT.idcategoria = _idcategoria
     ORDER BY ACT.idactivo DESC;
-END $$
--- YA ESTA
--- call obtenerRecursos();
+END $$  -- ME QUEDE AQUI
 
 
--- EDITAR UN PLAN DE TAREAS
-
--- ESTE PROCEDURE SERVIRA CADA QUE AGREGAMOS NUEVA TAREA Y QUEREMOS AÑADIRLO A LA LISTA DE TAREAS AGREGADAS
+DROP PROCEDURE IF EXISTS `obtenerTareaPorId`
 DELIMITER $$
-CREATE PROCEDURE obtenerTareaPorId(IN _idtarea INT)
+CREATE PROCEDURE `obtenerTareaPorId`(IN _idtarea INT)
 BEGIN
 	SELECT * FROM tareas WHERE idtarea = _idtarea;
 END $$
@@ -65,7 +62,7 @@ END $$
 DELIMITER $$
 CREATE PROCEDURE obtenerTareasPorPlanTarea(IN _idplantarea INT)
 BEGIN
-	SELECT TAR.idtarea, PT.descripcion as plan_tarea, TP.tipo_prioridad, TAR.descripcion, TAR.tiempo_estimado, TAR.cant_intervalo, TAR.frecuencia ,ES.estado FROM tareas TAR
+	SELECT TAR.idtarea, PT.descripcion as plan_tarea, TP.tipo_prioridad, TAR.descripcion, TAR.cant_intervalo, TAR.frecuencia ,ES.estado FROM tareas TAR
     INNER JOIN plandetareas PT ON TAR.idplantarea = PT.idplantarea -- quitar esta linea luego pq no es necesario mostrar el plan de tareas al que pertenece
     INNER JOIN tipo_prioridades TP ON TAR.idtipo_prioridad = TP.idtipo_prioridad
     INNER JOIN estados ES ON TAR.idestado = ES.idestado

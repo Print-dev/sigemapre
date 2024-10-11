@@ -45,18 +45,18 @@ VALUES
     ('Maquinaria Pesada'),
     ('Transporte');
 
-INSERT INTO subcategorias(idcategoria, subcategoria)
-VALUES
-    (1, 'Monitor'),
-    (1, 'Teclado'),
-    (1, 'Mouse'),
-    (2, 'Compresor'),
-    (2, 'Tornillo de banco'),
-    (4, 'Equipo de Corte'),
-    (4, 'Equipo de Soldadura'),
-    (5, 'Motocicleta'),
-    (5, 'Camión de Carga'),
-    (1, 'Impresora');
+-- INSERT INTO subcategorias(idcategoria, subcategoria)
+-- VALUES
+--    (1, 'Monitor'),
+--    (1, 'Teclado'),
+ --   (1, 'Mouse'),
+--    (2, 'Compresor'),
+--    (2, 'Tornillo de banco'),
+--    (4, 'Equipo de Corte'),
+--    (4, 'Equipo de Soldadura'),
+--    (5, 'Motocicleta'),
+--    (5, 'Camión de Carga'),
+ --   (1, 'Impresora');
 
 
 
@@ -99,19 +99,14 @@ INSERT INTO estados (estado) values
 	
 select * from estados;
 	
-select * from subcategorias;
+-- select * from subcategorias;
 
-INSERT INTO activos(idsubcategoria, idmarca, modelo, cod_identificacion, fecha_adquisicion, descripcion, especificaciones, idestado)
+INSERT INTO activos(idcategoria, idmarca, modelo, cod_identificacion, fecha_adquisicion, descripcion, especificaciones, idestado)
 VALUES
     (1, 1, 'Monitor 4K', 'MON123', NOW(), 'Monitor LG de 27 pulgadas', '{"resolucion":"3840x2160"}', 5),
     (2, 2, 'Teclado Mecánico', 'TEC123', NOW(), 'Teclado mecánico HP', '{"tipo":"mecánico", "conectividad":"inalámbrico"}', 5),
     (3, 4, 'Compresor Industrial', 'COMP123', NOW(), 'Compresor Caterpillar de 10HP', '{"potencia":"10HP"}', 2),
-    (4, 5, 'Camión de Carga Hyundai', 'CAM123', NOW(), 'Camión de carga pesada Hyundai', '{"capacidad":"10 toneladas"}', 2),
-    (5, 7, 'Motocicleta de Reparto FenWick', 'MOTO123', NOW(), 'Motocicleta de reparto', '{"cilindrada":"150cc"}', 2),
-    (2, 3, 'Tornillo de banco Nissan', 'TOR123', NOW(), 'Tornillo de banco industrial', '{"longitud":"15cm"}', 5),
-    (3, 6, 'Maquina de Corte CNC', 'CNC123', NOW(), 'Equipo de corte CNC de alta precisión', '{"precisión":"0.01mm"}', 2),
-    (3, 8, 'Robot Industrial UR10', 'UR123', NOW(), 'Robot industrial colaborativo', '{"carga_max":"10kg", "alcance":"1.3m"}', 2),
-    (10, 2, 'L3110', 'HL3110', NOW(), 'Impresora Hp L3110', '{"potencia":"20kwh"}', 2);
+    (4, 5, 'Camión de Carga Hyundai', 'CAM123', NOW(), 'Camión de carga pesada Hyundai', '{"capacidad":"10 toneladas"}', 2);    
 
 
 INSERT INTO tipo_prioridades (tipo_prioridad) values ('baja'),('media'),('alta'),('urgente');

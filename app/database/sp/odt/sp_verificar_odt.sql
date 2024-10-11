@@ -6,7 +6,6 @@ CREATE PROCEDURE `verificarPlanInconcluso`(IN _idplantarea INT)
 BEGIN
 	SELECT 
         pt.idplantarea, 
-        pt.idcategoria,
         pt.descripcion, 
         pt.borrador,
         COUNT(t.idtarea) AS cantidad_tareas,

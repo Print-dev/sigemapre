@@ -24,11 +24,10 @@ class Plandetarea extends ExecQuery
   public function add($params = []): array
   {
     try {
-      $sp = parent::execQ("CALL insertarPlanDeTareas(?,?,?)");
+      $sp = parent::execQ("CALL insertarPlanDeTareas(?,?)");
       $sp->execute(
         array(
           $params['descripcion'],
-          $params['idcategoria'],
           $params['borrador']
         )
       );

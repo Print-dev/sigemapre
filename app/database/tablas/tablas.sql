@@ -62,14 +62,14 @@ CREATE TABLE categorias
     CONSTRAINT uk_categoria UNIQUE(categoria)
 )ENGINE=INNODB;
 
-CREATE TABLE subcategorias
-(
-	idsubcategoria	INT AUTO_INCREMENT PRIMARY KEY,
-    idcategoria		INT NOT NULL,
-    subcategoria	VARCHAR(60) NOT NULL,	-- UK
-    CONSTRAINT uk_subcategoria UNIQUE(subcategoria),
-    CONSTRAINT fk_categoria FOREIGN KEY (idcategoria) REFERENCES categorias (idcategoria) ON DELETE CASCADE
-)ENGINE=INNODB;
+-- CREATE TABLE subcategorias
+-- (
+-- 	idsubcategoria	INT AUTO_INCREMENT PRIMARY KEY,
+--   idcategoria		INT NOT NULL,
+--    subcategoria	VARCHAR(60) NOT NULL,	-- UK
+--    CONSTRAINT uk_subcategoria UNIQUE(subcategoria),
+--    CONSTRAINT fk_categoria FOREIGN KEY (idcategoria) REFERENCES categorias (idcategoria) ON DELETE CASCADE
+-- )ENGINE=INNODB;
 
 CREATE TABLE marcas
 (
@@ -99,15 +99,15 @@ CREATE TABLE estados
 CREATE TABLE activos
 (
 	idactivo			INT AUTO_INCREMENT PRIMARY KEY,
-    idsubcategoria		INT 		NOT NULL,
+    idcategoria			INT 		NOT NULL,
     idmarca				INT 		NOT NULL,
     modelo				VARCHAR(60) NULL,
     cod_identificacion	CHAR(40) 	NOT NULL,
     fecha_adquisicion	DATE 		NOT NULL,
     descripcion			VARCHAR(200) NOT NULL,
     especificaciones	JSON 		NOT NULL,
-    idestado			int			not null,	
-    CONSTRAINT fkidsubcategoria FOREIGN KEY (idsubcategoria) REFERENCES subcategorias(idsubcategoria),
+    idestado			int			not null,	 -- falta poner un atributo de ubicacion a activos
+    CONSTRAINT fkidcategoria_act FOREIGN KEY (idcategoria) REFERENCES categorias(idcategoria),
     CONSTRAINT fkidmarca	 FOREIGN KEY (idmarca)	REFERENCES marcas(idmarca),
     CONSTRAINT fkidestado6	 foreign key (idestado) references estados (idestado)
     -- CONSTRAINT chkfecha_ad	 CHECK (fecha_aquisicion>=NOW())
@@ -117,11 +117,9 @@ CREATE TABLE plandetareas
 (
 	idplantarea		int			auto_increment primary key,
     descripcion		varchar(30)	not null,
-    idcategoria		int			not null,
     create_at		datetime	not null default now(),
     update_at		datetime	null,
 	borrador		boolean     null,
-    CONSTRAINT fk_idcateogoria_plan foreign key (idcategoria) references categorias (idcategoria) ON DELETE CASCADE,
     CONSTRAINT uk_descripcion_plan UNIQUE(descripcion)
 )ENGINE=INNODB; -- CHECK
 
@@ -137,7 +135,6 @@ CREATE TABLE tareas
     idplantarea			int				not null,
     idtipo_prioridad	int 			not null,
     descripcion			varchar(200)	not null,
-    tiempo_estimado		time			not null,
     fecha_inicio		datetime		not null,
     fecha_vencimiento	datetime		not null,
     cant_intervalo		int				not null,

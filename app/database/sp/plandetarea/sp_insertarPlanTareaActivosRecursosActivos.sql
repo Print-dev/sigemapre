@@ -6,12 +6,11 @@ DROP PROCEDURE IF EXISTS `insertarPlanDeTareas`
 DELIMITER $$
 CREATE PROCEDURE `insertarPlanDeTareas`(
 	IN _descripcion VARCHAR(30),
-    IN _idcategoria INT,
     IN _borrador BOOLEAN
 )
 BEGIN
-    INSERT INTO plandetareas (descripcion, idcategoria, borrador)
-    VALUES (_descripcion, _idcategoria, _borrador);
+    INSERT INTO plandetareas (descripcion, borrador)
+    VALUES (_descripcion, _borrador);
     
     SELECT MAX(idplantarea) as id from plandetareas;
 END $$
@@ -27,7 +26,6 @@ CREATE PROCEDURE `insertarTarea`(
     IN _idplantarea INT,
     IN _idtipo_prioridad INT,
     IN _descripcion VARCHAR(200),
-    IN _tiempo_estimado TIME,
     IN _fecha_inicio DATETIME,
     IN _fecha_vencimiento DATETIME,
     IN _cant_intervalo INT,
@@ -36,11 +34,11 @@ CREATE PROCEDURE `insertarTarea`(
 )
 BEGIN
     INSERT INTO tareas (
-        idplantarea, idtipo_prioridad, descripcion, tiempo_estimado,
+        idplantarea, idtipo_prioridad, descripcion,
         fecha_inicio, fecha_vencimiento, cant_intervalo, frecuencia, idestado
     )
     VALUES (
-        _idplantarea, _idtipo_prioridad, _descripcion, _tiempo_estimado,
+        _idplantarea, _idtipo_prioridad, _descripcion,
         _fecha_inicio, _fecha_vencimiento, _cant_intervalo, _frecuencia, _idestado
     );
     

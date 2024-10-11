@@ -62,7 +62,6 @@ BEGIN
         CONCAT(PERCRE.nombres, ' ', PERCRE.apellidos) AS creador,
         TAR.idtarea AS idtarea,
         ACT.descripcion AS activo,
-        TAR.tiempo_estimado AS duracion,
         EST.estado,
         DODT.clasificacion
     FROM odt ODT
@@ -78,7 +77,7 @@ BEGIN
     INNER JOIN estados EST ON EST.idestado = ODT.idestado
     LEFT JOIN detalle_odt DODT ON DODT.clasificacion = EST.idestado 
     WHERE ODT.borrador = _borrador
-    GROUP BY ODT.idorden_trabajo, TAR.descripcion, TAR.fecha_inicio, TAR.fecha_vencimiento, PERCRE.nombres, PERCRE.apellidos, TAR.idtarea, ACT.descripcion, TAR.tiempo_estimado, EST.estado;
+    GROUP BY ODT.idorden_trabajo, TAR.descripcion, TAR.fecha_inicio, TAR.fecha_vencimiento, PERCRE.nombres, PERCRE.apellidos, TAR.idtarea, ACT.descripcion, EST.estado;
 END //
 
 
@@ -94,8 +93,7 @@ BEGIN
         PT.descripcion as plantarea,
 		TAR.descripcion as tarea,
         TAR.idtarea as idtarea,
-        ACT.descripcion as activo,
-        TAR.tiempo_estimado as duracion
+        ACT.descripcion as activo
 		from odt ODT
         INNER JOIN tareas TAR ON TAR.idtarea = ODT.idtarea
         INNER JOIN activos_vinculados_tarea AVT ON AVT.idtarea = TAR.idtarea

@@ -1,8 +1,8 @@
-{% extends  'layout.twig' %}
+{% extends 'layout.twig' %}
 
 {% block header %}
-  {{ parent() }}
-  <link rel="stylesheet" href="http://localhost/css/registrarPlan.css">
+{{ parent() }}
+<link rel="stylesheet" href="http://localhost/css/registrarPlan.css">
 
 {% endblock %}
 
@@ -14,23 +14,19 @@
     <div>
       <label for="txtDescripcionPlanTarea">Descripcion</label>
       <input type="text" id="txtDescripcionPlanTarea" pattern="[a-zA-Z\s]+" title="Solo se permiten letras y espacios"
-      required />
+        required />
     </div>
-    <label for="sltCategorias">Categorias</label>
-    <select name="" id="sltCategorias"></select>
     <button type="button" id="btnGuardarPlanTarea">Guardar Plan</button>
   </div>
 
   <hr />
   <h3>Tareas</h3>
-
   <div style="display: flex">
     <div>
       <form id="form-tarea">
         <label for="">Descripcion</label>
         <input type="text" id="txtDescripcionTarea" disabled required />
         <label for="">Tiempo estimado</label>
-        <input type="time" id="txtTiempoEstimadoTarea" disabled required />
         <input type="date" id="fecha-inicio" disabled required />
         <input type="date" id="fecha-vencimiento" disabled required />
         <button type="button" data-bs-toggle="modal" data-bs-target="#asignarRecursos" id="btnAsignarRecursos" disabled>
@@ -84,14 +80,14 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <table class="table table-borderless">
+          <table id="tablaRecursos" class="stripe row-border order-column nowrap" style="width:100%">
             <thead>
               <tr>
-                <th scope="col">#</th>
-                <th scope="col">Recurso</th>                
-                <th scope="col">Costo Adquisicion</th>
-                <th scope="col">Stock</th>
-                <th scope="col">Cantidad</th>
+                <th></th>
+                <th>Recurso</th>
+                <th>Costo Adquisicion</th>
+                <th>Stock</th>
+                <th>Cantidad</th>
               </tr>
             </thead>
             <tbody id="recursosBodyTable"></tbody>
@@ -119,23 +115,23 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <table class="table table-borderless">
+          <table id="tablaActivos" class="stripe row-border order-column nowrap" style="width:100%">
             <thead>
               <tr>
-                <th scope="col">#</th>
-                <th scope="col">Activo</th>
-                <th scope="col">Código</th>
-                <th scope="col">Categoria</th>
-                <th scope="col">Subcategoria</th>
-                <th scope="col">Marca</th>
-                <th scope="col">Modelo</th>
+                <th></th>
+                <th>Activo</th>
+                <th>Código</th>
+                <th>Categoria</th>
+                <th>Subcategoria</th>
+                <th>Marca</th>
+                <th>Modelo</th>
               </tr>
             </thead>
             <tbody id="activosBodyTable"></tbody>
             <tfoot>
               <select name="" id="elegirTareaParaActivo"></select>
             </tfoot>
-          </table>
+          </table>          
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary btn-agregar-activos">
@@ -152,167 +148,162 @@
 {% endblock %}
 
 
-{% block footer %} 
-  {{ parent() }}  {# Incluye el contenido del bloque 'footer' del layout base #}
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+{% block footer %}
+{{ parent() }} {# Incluye el contenido del bloque 'footer' del layout base #}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      function $(object = null) {
-        return document.querySelector(object);
-      }
-
-      //GLOBAL
-      let botonCambiado = false;
-      let idcategoria_generado = -1;
-      let idplantarea_generado = -1;
-      let idtarea_generado = -1;
-      let rolUnDecoded = "{{ session['login']['rol'] }}";
-      const rol = rolUnDecoded.toLowerCase();
-      let recursosSeleccionados = [];
-      let activosSeleccionados = [];
-      const btnGuardarRecursos = $(".btn-agregar-recursos");
-      const btnGuardarTarea = $("#btnGuardarTarea");
-      const btnGuardarPlanTarea = $("#btnGuardarPlanTarea");
-      const tipoPrioridadTarea = $("#tipoPrioridadTarea");
-      const formtarea = $("#form-tarea");
-      const selectElegirTareaParaActivo = $("#elegirTareaParaActivo");
-
-      renderCategorias()
-      if (window.localStorage.getItem("idplantarea")) {
-        (async () => {
-          const { data } = await axios.get(
-            `/transparenciawsrest/consulta/plandetareas/inconcluso/${window.localStorage.getItem(
-              "idplantarea"
-            )}`
-          );
-          console.log("verificarTareaInconclusa: ", data);
-          if (data.length > 0) {
-            if (data[0].cantidad_tareas < 1 || data[0].cantidad_activos < 1) {
-              if (confirm("Tienes un plan de tareas inconcluso, deseas retomarlo?")) {
-                console.log("retomado");
-                idplantarea_generado = data[0].idplantarea;
-                renderPlanTareaYcategoria(data[0].descripcion, data[0].idcategoria);
-                idcategoria_generado = data[0].idcategoria;
-                await loadFunctions()
-                habilitarCamposTarea(false);
-                $("#btnGuardarPlanTarea").remove()
-                $("#sltCategorias").disabled = true
-                $("#txtDescripcionPlanTarea").disabled = true
-                console.log("ID PLANTAREA GENERADO DSPUES DE RETOMAR: ", idplantarea_generado)
-                return;
-              }
-              renderCategorias()
-              window.localStorage.clear()
-              console.log("borrando y creando uno nuevo ...");
-            }
-          }
-        })();
-      }
-
-      function habilitarCamposTarea(habilitado = true) {
-        $("#txtDescripcionTarea").disabled = habilitado
-        $("#txtTiempoEstimadoTarea").disabled = habilitado
-        $("#fecha-inicio").disabled = habilitado
-        $("#fecha-vencimiento").disabled = habilitado
-        $("#btnAsignarRecursos").disabled = habilitado
-        $("#txtIntervaloTarea").disabled = habilitado
-        $("#txtFrecuenciaTarea").disabled = habilitado
-        $("#tipoPrioridadTarea").disabled = habilitado
-        $("#btnGuardarTarea").disabled = habilitado
-      }
-
-      function habilitarCamposActivos(habilitado = true) {
-        $("#btnSeleccionarActivo").disabled = habilitado
-        $("#btnConfirmarCambios").disabled = habilitado
-      }
-
-      async function loadFunctions() {
-        renderPrioridades();
-        renderTareasAgregadas();
-        renderActivosAgregados();
-        await renderRecursosList();
-        renderActivosList();
-        renderTareasSelect()
-      }
-      //verificarTareasAsociadasPlan()
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    function $(object = null) {
+      return document.querySelector(object);
+    }
+    //GLOBAL
+    let botonCambiado = false;
+    let idplantarea_generado = -1;
+    let idtarea_generado = -1;
+    let rolUnDecoded = "{{ session['login']['rol'] }}";
+    const rol = rolUnDecoded.toLowerCase();
+    let recursosSeleccionados = [];
+    let activosSeleccionados = [];
+    const btnGuardarRecursos = $(".btn-agregar-recursos");
+    const btnGuardarTarea = $("#btnGuardarTarea");
+    const btnGuardarPlanTarea = $("#btnGuardarPlanTarea");
+    const tipoPrioridadTarea = $("#tipoPrioridadTarea");
+    const formtarea = $("#form-tarea");
+    const selectElegirTareaParaActivo = $("#elegirTareaParaActivo");
+    //const txtBuscarRecurso = $("#buscarRecurso")
 
 
-      /* async function verificarTareasAsociadasPlan() {
-      const {data} = await axios.get(`/transparenciawsrest/consulta/plandetareas/sintareas/${idplantarea_generado}`)
-      console.log("tareas vinculadas al plan: ", data)
-    } */
-      //const = document.querySelector("#")
-      async function renderCategorias() {
-        const { data } = await axios.get(`/transparenciawsrest/consulta/categorias/data`)
-        console.log("categorias renderizadas: ", data)
-        const selectCategorias = $("#sltCategorias");
-        selectCategorias.innerHTML += `
-              <option value="-1">Eliga una categoria</option>
-            `;
-        for (let i = 0; i < data.length; i++) {
-
-          selectCategorias.innerHTML += `
-              <option value="${data[i].idcategoria}">${data[i].categoria}</option>
-            `;
-
-        }
-      }
-
-      async function renderPrioridades() {
+    if (window.localStorage.getItem("idplantarea")) {
+      (async () => {
         const { data } = await axios.get(
-          "/transparenciawsrest/consulta/tprioridades/data"
+          `/transparenciawsrest/consulta/plandetareas/inconcluso/${window.localStorage.getItem(
+            "idplantarea"
+          )}`
         );
+        console.log("verificarTareaInconclusa: ", data);
+        if (data.length > 0) {
+          if (data[0].cantidad_tareas < 1 || data[0].cantidad_activos < 1) {
+            if (confirm("Tienes un plan de tareas inconcluso, deseas retomarlo?")) {
+              console.log("retomado");
+              idplantarea_generado = data[0].idplantarea;
+              renderPlanTarea(data[0].descripcion);
+              await loadFunctions()
+              habilitarCamposTarea(false);
+              $("#btnGuardarPlanTarea").remove()
+              $("#txtDescripcionPlanTarea").disabled = true
+              console.log("ID PLANTAREA GENERADO DSPUES DE RETOMAR: ", idplantarea_generado)
+              return;
+            }
+            window.localStorage.clear()
+            console.log("borrando y creando uno nuevo ...");
+          }
+        }
+      })();
+    }
 
-        //selects de prioridades
-        for (let i = 0; i < data.length; i++) {
-          const selectPrioridades = $("#tipoPrioridadTarea");
-          selectPrioridades.innerHTML += `
+    function habilitarCamposTarea(habilitado = true) {
+      $("#txtDescripcionTarea").disabled = habilitado
+      $("#fecha-inicio").disabled = habilitado
+      $("#fecha-vencimiento").disabled = habilitado
+      $("#btnAsignarRecursos").disabled = habilitado
+      $("#txtIntervaloTarea").disabled = habilitado
+      $("#txtFrecuenciaTarea").disabled = habilitado
+      $("#tipoPrioridadTarea").disabled = habilitado
+      $("#btnGuardarTarea").disabled = habilitado
+    }
+
+    function habilitarCamposActivos(habilitado = true) {
+      $("#btnSeleccionarActivo").disabled = habilitado
+      $("#btnConfirmarCambios").disabled = habilitado
+    }
+
+    async function loadFunctions() {
+      renderPrioridades();
+      renderTareasAgregadas();
+      renderActivosAgregados();
+      await renderRecursosList();
+      renderActivosList();
+      renderTareasSelect()
+    }
+    //verificarTareasAsociadasPlan()
+
+
+    /* async function verificarTareasAsociadasPlan() {
+    const {data} = await axios.get(`/transparenciawsrest/consulta/plandetareas/sintareas/${idplantarea_generado}`)
+    console.log("tareas vinculadas al plan: ", data)
+  } */
+    //const = document.querySelector("#")
+
+    async function renderPrioridades() {
+      const { data } = await axios.get(
+        "/transparenciawsrest/consulta/tprioridades/data"
+      );
+
+      //selects de prioridades
+      for (let i = 0; i < data.length; i++) {
+        const selectPrioridades = $("#tipoPrioridadTarea");
+        selectPrioridades.innerHTML += `
               <option value="${data[i].idtipo_prioridad}">${data[i].tipo_prioridad}</option>
             `;
-        }
       }
+    }
 
-      async function renderPlanTareaYcategoria(txtDescripcion, txtCategoria) {
-        const selectCategorias = $("#sltCategorias");
-        const descripcionPlanTarea = $("#txtDescripcionPlanTarea");
-        descripcionPlanTarea.value = txtDescripcion;
-        selectCategorias.value = txtCategoria
-      }
+    async function renderPlanTarea(txtDescripcion) {
+      const descripcionPlanTarea = $("#txtDescripcionPlanTarea");
+      descripcionPlanTarea.value = txtDescripcion;
+    }
 
-      async function renderRecursosList() {
-        console.log("EMPEZANDO A RENDERIZAR LOS RECURSOS --------------------->")
-        console.log("ANTES DE OBTENER LOS RECURSOS") 
-        const { data } = await axios.get(
-          `/transparenciawsrest/consulta/recursos/${idcategoria_generado}`
-        );
-        console.log("recursos a renderizar: ", data)
-        for (let i = 0; i < data.length; i++) {
-          const recursosList = $("#recursosBodyTable");
-          recursosList.innerHTML += `
-                  <tr>
+    async function renderRecursosList() { ME QUEDE ACAAAAAAAAAAAAAAAAAAAAAAAAAAA , TAMBIEN FALTA ACTUALIZAR EL PROCEDIMIENTO  E OBTENER activos, tambien falta modificar la tabla ativos hay  agregar un campo de ubiaciones 
+      const recursosList = $("#recursosBodyTable");
+      const { data } = await axios.get(`/transparenciawsrest/consulta/recursos`);
+      console.log("recursos a renderizar: ", data);
+      recursosList.innerHTML = "";
+      for (let i = 0; i < data.length; i++) {
+        recursosList.innerHTML += `
+                <tr>
                     <th scope="row">
-                      <input type="checkbox" class="recurso-checkbox" data-recurso-id="${data[i].idrecurso}" value="${data[i].idrecurso}">
+                        <input type="checkbox" class="recurso-checkbox" data-recurso-id="${data[i].idrecurso}" value="${data[i].idrecurso}">
                     </th>
                     <td>${data[i].recurso}</td>                  
                     <td>${data[i].costo}</td>
                     <td>${data[i].stock_total}</td>
                     <td>
-								      <input type="number" data-idrecurso-cantidad="${data[i].idrecurso}" disabled>
+                        <input type="number" data-idrecurso-cantidad="${data[i].idrecurso}" style="width: 60px;" disabled>
                     </td>
-                  </tr>
-                `;
-        }
+                </tr>
+            `;
       }
+      // Inicializar DataTables
+      new DataTable('#tablaRecursos', {
+        columnDefs: [
+          {
+            orderable: true
+          }
+        ],
+        fixedColumns: {
+          start: 2
+        },
+        order: [[1, 'asc']],
+        paging: false,
+        scrollCollapse: true,
+        scrollX: true,
+        scrollY: 300,
+        select: {
+          style: 'os',
+          selector: 'td:first-child'
+        }
+      });
+    }
 
-      async function renderActivosList() {
-        const { data } = await axios.get(
-          `/transparenciawsrest/consulta/activos/${idcategoria_generado}`
-        );
-        console.log("activos totales en toda la bd", data);
-        for (let i = 0; i < data.length; i++) {
-          const activosList = $("#activosBodyTable");
-          activosList.innerHTML += `
+    async function renderActivosList() {
+      const { data } = await axios.get(
+        `/transparenciawsrest/consulta/activos/${true}` //cambiar luego
+      );
+      console.log("activos totales en toda la bd", data);
+      for (let i = 0; i < data.length; i++) {
+        const activosList = $("#activosBodyTable");
+        activosList.innerHTML += `
                   <tr>
                     <th scope="row">
                       <input type="checkbox" class="activo-checkbox" value="${data[i].idactivo}">
@@ -325,93 +316,111 @@
                     <td>${data[i].modelo}</td>
                   </tr>
                 `;
+      }
+      
+      new DataTable('#tablaActivos', {
+        columnDefs: [
+          {
+            orderable: true
+          }
+        ],
+        fixedColumns: {
+          start: 2
+        },
+        order: [[1, 'asc']],
+        paging: false,
+        scrollCollapse: true,
+        scrollX: true,
+        scrollY: 300,
+        select: {
+          style: 'os',
+          selector: 'td:first-child'
         }
-      }
+      });
+    }
 
-      function asignarCantidadPorRecurso() {
-        recursosSeleccionados = [];
-        document
-          .querySelectorAll(".recurso-checkbox:checked")
-          .forEach(function (checkbox) {
-            const recursoid = checkbox.value; //esto nos servira para vincular al input cantidd
-            //const recursoNombre = checkbox.closest('tr').querySelector('td:nth-child(2)').textContent; // Nombre del recurso
-            const cantidad = parseInt(
-              checkbox.closest("tr").querySelector('input[type="number"]')
-                .value
-            ); // Cantidad
+    function asignarCantidadPorRecurso() {
+      recursosSeleccionados = [];
+      document
+        .querySelectorAll(".recurso-checkbox:checked")
+        .forEach(function (checkbox) {
+          const recursoid = checkbox.value; //esto nos servira para vincular al input cantidd
+          //const recursoNombre = checkbox.closest('tr').querySelector('td:nth-child(2)').textContent; // Nombre del recurso
+          const cantidad = parseInt(
+            checkbox.closest("tr").querySelector('input[type="number"]')
+              .value
+          ); // Cantidad
 
-            // Validar si la cantidad es válida
-            if (isNaN(cantidad) || cantidad <= 0) {
-              alert("Eliga una cantidad valida de recurso");
-              console.log("recursosSeleccionados", recursosSeleccionados);
-              return;
-            }
-            recursosSeleccionados.push({
-              idrecurso: parseInt(recursoid),
-              idtarea: parseInt(idtarea_generado), //poner idtarea luego
-              cantidad: parseInt(cantidad),
-            });
+          // Validar si la cantidad es válida
+          if (isNaN(cantidad) || cantidad <= 0) {
+            alert("Eliga una cantidad valida de recurso");
+            console.log("recursosSeleccionados", recursosSeleccionados);
+            return;
+          }
+          recursosSeleccionados.push({
+            idrecurso: parseInt(recursoid),
+            idtarea: parseInt(idtarea_generado), //poner idtarea luego
+            cantidad: parseInt(cantidad),
           });
-        console.log(recursosSeleccionados);
-      }
+        });
+      console.log(recursosSeleccionados);
+    }
 
 
-      async function agregarTareas() {
-        const descripcionTarea = $("#txtDescripcionTarea");
-        const tiempoEstimadoTarea = $("#txtTiempoEstimadoTarea");
-        const intervaloTarea = $("#txtIntervaloTarea");
-        const frecuenciaTarea = $("#txtFrecuenciaTarea");
-        const fechaInicioTarea = $("#fecha-inicio");
-        const fechaVencimiento = $("#fecha-vencimiento");
+    async function agregarTareas() {
+      const descripcionTarea = $("#txtDescripcionTarea");
+      const intervaloTarea = $("#txtIntervaloTarea");
+      const frecuenciaTarea = $("#txtFrecuenciaTarea");
+      const fechaInicioTarea = $("#fecha-inicio");
+      const fechaVencimiento = $("#fecha-vencimiento");
 
-        let form = new FormData();
-        form.append("idplantarea", idplantarea_generado);
-        form.append("idtipo_prioridad", tipoPrioridadTarea.value);
-        form.append("descripcion", descripcionTarea.value);
-        form.append("tiempo_estimado", tiempoEstimadoTarea.value);
-        form.append("fecha_inicio", fechaInicioTarea.value);
-        form.append("fecha_vencimiento", fechaVencimiento.value);
-        form.append("cant_intervalo", intervaloTarea.value);
-        form.append("frecuencia", frecuenciaTarea.value);
-        form.append("idestado", 1);
-        //console.log("agregar tareas idplantarea: ", idplantarea_generado)
-        const data = await axios.post(
-          "/" + rol + "/tareas/plantareas/tarea/registrar",
-          form
-        );
-        return data;
-      }
+      let form = new FormData();
+      form.append("idplantarea", idplantarea_generado);
+      form.append("idtipo_prioridad", tipoPrioridadTarea.value);
+      form.append("descripcion", descripcionTarea.value);
+      form.append("fecha_inicio", fechaInicioTarea.value);
+      form.append("fecha_vencimiento", fechaVencimiento.value);
+      form.append("cant_intervalo", intervaloTarea.value);
+      form.append("frecuencia", frecuenciaTarea.value);
+      form.append("idestado", 1);
+      //console.log("agregar tareas idplantarea: ", idplantarea_generado)
+      const data = await axios.post(
+        "/" + rol + "/tareas/plantareas/tarea/registrar",
+        form
+      );
+      return data;
+    }
 
-      async function eliminarActivoVinculadoIndividual(params) {
-        document.querySelectorAll(".btn-eliminar-activo").forEach(button => {
-          button.addEventListener("click", async (e) => {
-            const idactivovinculado = e.target.getAttribute('data-activovinculado-id')
-            console.log("CLIKC A ELIMINAR ACTIVO INDIVIUAL, ", idactivovinculado)
-            const confirmacion = confirm(`¿Estás seguro de que deseas eliminar el activo vincualdo N° ${idactivovinculado}?`);
-            if (confirmacion) {
-              const response = await axios.delete('/' + rol + `/tareas/plantareas/activosvinculados/${idactivovinculado}`);
-              console.log(`Tarea ${idactivovinculado} eliminada con éxito.`, response);
-              e.target.closest('li').remove(); // Eliminar el li del DOM
-            }
-          })
+    async function eliminarActivoVinculadoIndividual(params) {
+      document.querySelectorAll(".btn-eliminar-activo").forEach(button => {
+        button.addEventListener("click", async (e) => {
+          const idactivovinculado = e.target.getAttribute('data-activovinculado-id')
+          console.log("CLIKC A ELIMINAR ACTIVO INDIVIUAL, ", idactivovinculado)
+          const confirmacion = confirm(`¿Estás seguro de que deseas eliminar el activo vincualdo N° ${idactivovinculado}?`);
+          if (confirmacion) {
+            const response = await axios.delete('/' + rol + `/tareas/plantareas/activosvinculados/${idactivovinculado}`);
+            console.log(`Tarea ${idactivovinculado} eliminada con éxito.`, response);
+            e.target.closest('li').remove(); // Eliminar el li del DOM
+          }
         })
-      }
+      })
+    }
 
-      async function renderActivosAgregados() {
-        const { data } = await axios.get(
-          `/transparenciawsrest/consulta/activos/plantarea/${idplantarea_generado}`
-        );
-        console.log(
-          `activos asignadas al plan ${idplantarea_generado}:`,
-          data
-        );
+    async function renderActivosAgregados() {
+      const { data } = await axios.get(
+        `/transparenciawsrest/consulta/activos/plantarea/${idplantarea_generado}`
+      );
+      console.log(
+        `activos asignadas al plan ${idplantarea_generado}:`,
+        data
+      );
 
-        const ulActivosAgregados = $(".listaActivosAsignados");
+      const ulActivosAgregados = $(".listaActivosAsignados");
 
-        ulActivosAgregados.innerHTML = "";
+      ulActivosAgregados.innerHTML = "";
 
-        for (let i = 0; i < data.length; i++) {
-          ulActivosAgregados.innerHTML += `
+      for (let i = 0; i < data.length; i++) {
+        ulActivosAgregados.innerHTML += `
             <div>
 							<li data-activovinculado-id="${data[i].idactivo_vinculado}" data-tarea-id="${data[i].idtarea}">
 								${data[i].descripcion} - Tarea: ${data[i].idtarea}
@@ -419,645 +428,33 @@
 							</li>
 						</div>
           `;
-          await eliminarActivoVinculadoIndividual()
-        }
-        console.log("ul activos agregados: ", ulActivosAgregados)
+        await eliminarActivoVinculadoIndividual()
       }
+      console.log("ul activos agregados: ", ulActivosAgregados)
+    }
+
+    async function confirmarEliminacionTarea() {
+      document.querySelectorAll('.btn-eliminar-tarea').forEach(button => {
+        button.addEventListener('click', async (e) => {
+          console.log("CLICK A ELIMINAR")
+          const btnGuardar = document.querySelector("#btnGuardarTarea");
+          const idtarea = e.target.getAttribute('data-tarea-id');
+          console.log("ID TAREA SELECCIONADA A ELIMINAR", idtarea)
+          // Lógica para eliminar la tarea
+          const confirmacion = confirm(`¿Estás seguro de que deseas eliminar la tarea ${idtarea}?`);
+          if (confirmacion) {
+            botonCambiado = false;
+            // Aquí puedes agregar la lógica para eliminar la tarea, por ejemplo:
+            const response = await axios.delete('/' + rol + `/tareas/plantareas/tarea/${idtarea}`);
+            console.log(`Tarea ${idtarea} eliminada con éxito.`, response);
+            const liElement = e.target.closest('li');
+            console.log("Elemento LI a eliminar:", liElement);
+            liElement.remove(); // Eliminar el li del DOM
+            eliminarActivosDeTarea(idtarea)
+            eliminarTareaDelSelect(idtarea);
+            const tareasRestantes = document.querySelectorAll('.tarea-agregada').length;
+            console.log("TAREAS RESTANTES:", tareasRestantes)
 
-      async function confirmarEliminacionTarea() {
-        document.querySelectorAll('.btn-eliminar-tarea').forEach(button => {
-          button.addEventListener('click', async (e) => {
-            console.log("CLICK A ELIMINAR")
-            const btnGuardar = document.querySelector("#btnGuardarTarea");
-            const idtarea = e.target.getAttribute('data-tarea-id');
-            console.log("ID TAREA SELECCIONADA A ELIMINAR", idtarea)
-            // Lógica para eliminar la tarea
-            const confirmacion = confirm(`¿Estás seguro de que deseas eliminar la tarea ${idtarea}?`);
-            if (confirmacion) {
-              botonCambiado = false;
-              // Aquí puedes agregar la lógica para eliminar la tarea, por ejemplo:
-              const response = await axios.delete('/' + rol + `/tareas/plantareas/tarea/${idtarea}`);
-              console.log(`Tarea ${idtarea} eliminada con éxito.`, response);
-              const liElement = e.target.closest('li');
-              console.log("Elemento LI a eliminar:", liElement);
-              liElement.remove(); // Eliminar el li del DOM
-              eliminarActivosDeTarea(idtarea)
-              eliminarTareaDelSelect(idtarea);
-              const tareasRestantes = document.querySelectorAll('.tarea-agregada').length;
-              console.log("TAREAS RESTANTES:", tareasRestantes)
-
-              const btnActualizarExistente = document.querySelector("#btnActualizarTarea");
-              if (btnActualizarExistente) {
-                btnActualizarExistente.remove();
-              }
-
-              // Verificar si ya existe el botón de cancelar y eliminarlo
-              const btnCancelarExistente = document.querySelector("#btnCancelarActualizacion");
-              if (btnCancelarExistente) {
-                btnCancelarExistente.remove();
-              }
-
-              btnGuardar.style.display = "inline-block";
-              resetUI()
-
-              if (tareasRestantes === 0) {
-                // Si ya no hay tareas, deshabilitar los campos de activos
-                habilitarCamposActivos(true);
-              } else {
-                habilitarCamposActivos(false);
-              }
-            }
-          });
-        });
-      }
-
-      async function renderTareasAgregadas() {
-        //RENDER UN SELECT QUE LISTE LAS TAREAS PARA ASIGNARLAS A CADA ACTIVO
-        const ullistaTareasAgregadas = $(".listaTareasAgregadas")
-        const { data } = await axios.get(`/transparenciawsrest/consulta/tareasporplantarea/${idplantarea_generado}`)
-        console.log(data)
-        for (let i = 0; i < data.length; i++) {
-          ullistaTareasAgregadas.innerHTML += `
-						<li data-tarea-id="${data[i].idtarea}" class="tarea-agregada">
-							${data[i].descripcion} - Tarea: ${data[i].idtarea}
-							<button class="btn-eliminar-tarea" data-tarea-id="${data[i].idtarea}">Eliminar</button>
-						</li>	
-					`
-        }
-        if (data.length > 0) {
-          habilitarCamposActivos(false)
-        } else {
-          habilitarCamposActivos(true)
-        }
-
-        confirmarEliminacionTarea()
-
-      }
-
-
-      function eliminarActivosDeTarea(idtarea) {
-        console.log("entrando a la funcion eliminarActivosDeTarea, id tarea: ", idtarea)
-        const activos = document.querySelectorAll(`.listaActivosAsignados li[data-tarea-id="${idtarea}"]`);
-        console.log("ID TAREA JALADOOO: ", idtarea)
-        console.log("activos jalados: ", activos)
-        activos.forEach(activo => {
-          console.log("recorriendo los activos por tarea:", activo)
-          activo.remove(); // Eliminar cada activo del DOM
-        });
-      }
-
-      function eliminarTareaDelSelect(idtarea) {
-        const selectElegirTareaParaActivo = document.querySelector("#elegirTareaParaActivo");
-        const optionToRemove = selectElegirTareaParaActivo.querySelector(`option[value="${idtarea}"]`);
-        if (optionToRemove) {
-          optionToRemove.remove(); // Eliminar el option del DOM
-        }
-      }
-
-      async function renderTareasSelect() {
-        //RENDER UN SELECT QUE LISTE LAS TAREAS PARA ASIGNARLAS A CADA ACTIVO
-        console.log("ID PLANTAAREA GENERADO: ", idplantarea_generado)
-        const { data } = await axios.get(
-          `/transparenciawsrest/consulta/tareasporplantarea/${idplantarea_generado}`
-        );
-        console.log(
-          `tareas asignadas al plan ${idplantarea_generado}:`,
-          data
-        );
-
-        //const ulTareasAgregadas = $(".listaTareasAgregadas");
-        const selectElegirTareaParaActivo = $("#elegirTareaParaActivo");
-
-        //ulTareasAgregadas.innerHTML = "";
-        selectElegirTareaParaActivo.innerHTML =
-          "<option value='-1'>Seleccione una tarea</option>"; // Opción predeterminada
-
-        for (let i = 0; i < data.length; i++) {
-          /* ulTareasAgregadas.innerHTML += `
-            <li data-tarea-id="${data[i].idtarea}">${data[i].descripcion}</li>
-          `; */
-          selectElegirTareaParaActivo.innerHTML += `
-						<option value="${data[i].idtarea}">${data[i].descripcion}</option>
-					`;
-        }
-      }
-
-      async function renderRecursosPorTarea(idtarea) {
-        const { data } = await axios.get(`/transparenciawsrest/consulta/recursos/tarea/${idtarea}`)
-        return data
-      }
-
-      async function actualizarTarea(idtareaObtenida) {
-        const tipoPrioridadTarea = document.getElementById("tipoPrioridadTarea").value;
-        const descripcionTarea = document.getElementById("txtDescripcionTarea").value;
-        const tiempoEstimadoTarea = document.getElementById("txtTiempoEstimadoTarea").value;
-        const intervaloTarea = document.getElementById("txtIntervaloTarea").value;
-        const frecuenciaTarea = document.getElementById("txtFrecuenciaTarea").value;
-        const fechaInicioTarea = document.getElementById("fecha-inicio").value;
-        const fechaVencimiento = document.getElementById("fecha-vencimiento").value;
-
-        // Crear objeto JSON con los datos
-        const datos = {
-          idtarea: idtareaObtenida,
-          idtipo_prioridad: tipoPrioridadTarea,
-          descripcion: descripcionTarea,
-          tiempo_estimado: tiempoEstimadoTarea,
-          fecha_inicio: fechaInicioTarea,
-          fecha_vencimiento: fechaVencimiento,
-          cant_intervalo: intervaloTarea,
-          frecuencia: frecuenciaTarea,
-          idestado: 15 // Cambia esto si es necesario
-        };
-
-        try {
-          // Hacer la petición PUT con JSON
-          const data = await axios.put(
-            "/" + rol + "/tareas/plantareas/tarea/actualizar",
-            datos,  // Enviar datos como JSON
-            {
-              headers: {
-                'Content-Type': 'application/json', // Header para JSON
-              }
-            }
-          );
-
-          return data; // id
-        } catch (error) {
-          console.error('Error al actualizar la tarea:', error);
-        }
-      }
-
-      async function agregarActivosTarea(idTareaElegida) {
-        document.querySelectorAll(".activo-checkbox:checked").forEach(function (checkbox) {
-            const idactivo = checkbox.value;
-            activosSeleccionados.push({
-              idactivo: parseInt(idactivo),
-              idtarea: idTareaElegida,
-            });
-          });
-        console.log(idTareaElegida)
-        console.log(activosSeleccionados);
-        document
-          .querySelectorAll('input[type="checkbox"]')
-          .forEach((checkbox) => {
-            checkbox.checked = false;
-          });
-      }
-
-      async function planTerminado(idplantarea) {
-        console.log("ID PLAN A ACTUALIZAR EL BORRADOR; ", idplantarea)
-        const datosActualizar = {
-          idplantarea: idplantarea,
-          borrador: 0 // EL PLAN YA NO SERA BORRADOR
-        }
-        console.log("ANTES DE EJECUTARRRRRRR: ", datosActualizar)
-        const cambio = await fetch(`/${rol}/tareas/plantareas/actualizar`, {method: 'PUT',headers: {'Content-Type': 'application/json'}, body: JSON.stringify(datosActualizar)})
-        console.log("cambio de estado el plan?: ", await cambio.json())
-      }
-
-      async function guardarRecursosActualizados(idtarea) {
-
-        const recursosParaActualizar = [];
-        const recursosParaAgregar = [];
-
-        document.querySelectorAll(".recurso-checkbox:checked").forEach(function (checkbox) {
-          const recursoid = checkbox.value;
-          const cantidad = parseInt(
-            checkbox.closest("tr").querySelector('input[type="number"]').value
-          );
-
-          if (isNaN(cantidad) || cantidad <= 0) {
-            alert("Elige una cantidad válida de recurso");
-            return;
-          }
-
-          const idrecurso_vinculado = checkbox.getAttribute("data-idrecurso-vinculado");
-          console.log("idrecurso_vinculado data-idrecurso-vinculado:", idrecurso_vinculado)
-          if (idrecurso_vinculado) {
-            // Si tiene un idrecurso_vinculado, es para actualizar
-            recursosParaActualizar.push({
-              idrecurso_vinculado: parseInt(idrecurso_vinculado),
-              idrecurso: parseInt(recursoid),
-              idtarea: parseInt(idtarea),
-              cantidad: parseInt(cantidad),
-            });
-          } else {
-            // Si no tiene idrecurso_vinculado, es para agregar
-            recursosParaAgregar.push({
-              idrecurso: parseInt(recursoid),
-              idtarea: parseInt(idtarea),
-              cantidad: parseInt(cantidad),
-            });
-
-          }
-        });
-
-        console.log("Recursos para actualizar:", recursosParaActualizar);
-        console.log("Recursos para agregar:", recursosParaAgregar);
-
-        // Realizar las peticiones PUT para actualizar
-        for (const recurso of recursosParaActualizar) {
-          console.log("PASADO POR EL RECURSOS PAA ACTUALIZAR")
-          const recursosActualizar = {
-            idrecurso_vinculado: recurso.idrecurso_vinculado,
-            idrecurso: recurso.idrecurso,
-            idtarea: recurso.idtarea,
-            cantidad: recurso.cantidad
-          }
-          const data = await axios.put("/" + rol + `/tareas/plantareas/recursosvinculados/actualizar`, recursosActualizar, { headers: { 'Content-Type': 'application/json' } });
-          console.log("recursos actualizados peee: ", data)
-        }
-        console.log("PASE DE YA TUSABE")
-        // Realizar las peticiones POST para agregar
-        for (const recurso of recursosParaAgregar) {
-          console.log("LOOOOOOOOOOOOOOOOOOOOL")
-
-          let recursosAgregar = new FormData()
-          recursosAgregar.append("idrecurso", parseInt(recurso.idrecurso))
-          recursosAgregar.append("idtarea", parseInt(recurso.idtarea)),
-            recursosAgregar.append("cantidad", parseInt(recurso.cantidad))
-          const data = await axios.post("/" + rol + `/tareas/plantareas/recursosvinculados/registrar`, recursosAgregar);
-          console.log("RECURSO RECIEN AGREGADO: ", data)
-        }
-        desmarcarCheckboxesYLimpiarCantidad()
-        alert("Recursos actualizados/agregados correctamente.");
-      }
-
-      async function actualizarRecursosPorTarea() {
-        document.querySelectorAll(".recurso-checkbox").forEach(recursoChk => {
-          const idRecursoChk = recursoChk.getAttribute("data-recurso-id")
-          const recursoEncontrado = recursosSeleccionados.find(recurso => recurso.idrecurso == idRecursoChk)
-          const inputCantidad = document.querySelector(`input[data-idrecurso-cantidad="${idRecursoChk}"]`);
-          if (recursoEncontrado) {
-            recursoChk.checked = true;
-            inputCantidad.disabled = false;
-            inputCantidad.value = recursoEncontrado.cantidad;
-          } else {
-            recursoChk.checked = false;
-            inputCantidad.disabled = true;
-            inputCantidad.value = "";
-          }
-        });
-      }
-
-      function desmarcarCheckboxesYLimpiarCantidad() {
-        document.querySelectorAll(".recurso-checkbox").forEach(checkbox => {
-          checkbox.checked = false;  // Desmarcar el checkbox
-          const inputCantidad = checkbox.closest("tr").querySelector('input[type="number"]');
-          inputCantidad.value = "";  // Limpiar el valor del input de cantidad
-          inputCantidad.disabled = true;  // Deshabilitar el input
-        });
-      }
-
-      selectElegirTareaParaActivo.addEventListener("change", function () {
-        console.log("Select tarea cambiando ...");
-
-        // Actualizar todos los li con la nueva tarea seleccionada
-        document.querySelectorAll(".activo-checkbox:checked").forEach((checkbox) => {
-          const activoid = checkbox.value;
-          const liExistente = $(".listaActivosAsignadosPrevia").querySelector(`li[data-activo-id="${activoid}"]`);
-
-          if (liExistente) {
-            liExistente.innerHTML = `${liExistente.textContent.split(' - ')[0]} - Tarea: ${selectElegirTareaParaActivo.value}`;
-            liExistente.setAttribute("data-tarea-id", selectElegirTareaParaActivo.value);
-          }
-        });
-
-        console.log("li tarea cambiada");
-      });
-
-      document.body.addEventListener("change", function (event) {
-        if (event.target.matches(".recurso-checkbox")) {
-          const btnGuardarRecursos = $(".btn-agregar-recursos")
-          //const recursoid_select = event.target.value;
-          //const ulrecursos = $("#listaRecursosAsignados")
-          //const recursoNombre = event.target.closest('tr').querySelector('td:nth-child(2)').textContent; // Obtén el nombre del recurso desde la tabla
-          const cantidadInput = event.target
-            .closest("tr")
-            .querySelector('input[type="number"]');
-          const cantidad = cantidadInput.value;
-
-          if (event.target.checked) {
-            cantidadInput.disabled = false;
-            cantidadInput.value = 1;
-          } else {
-            cantidadInput.disabled = true;
-            cantidadInput.value = null;
-          }
-
-          const checkboxesSeleccionados = document.querySelectorAll(
-            ".recurso-checkbox:checked"
-          ).length;
-
-          // Habilitar el botón si hay al menos un checkbox seleccionado, deshabilitar si no hay ninguno
-          if (checkboxesSeleccionados > 0) {
-            btnGuardarRecursos.disabled = false;
-          } else {
-            btnGuardarRecursos.disabled = true;
-          }
-        }
-        else if (event.target.matches(".activo-checkbox")) {
-          const activoid_select = event.target.value;
-          const ulactivosAsignadosPrevia = $(".listaActivosAsignadosPrevia");
-          const activoNombre = event.target.closest("tr").querySelector("td:nth-child(2)").textContent;
-
-          if (event.target.checked) {
-            console.log("hola")
-            console.log(activosSeleccionados);
-            if (selectElegirTareaParaActivo.value == null || selectElegirTareaParaActivo.value == -1) {
-              alert("Por favor, elija una tarea válida antes de agregar activos.");
-              event.target.checked = false;
-              return; // Salir de la función si no hay tarea seleccionada
-            }
-            let liExistente = ulactivosAsignadosPrevia.querySelector(`li[data-activo-id="${activoid_select}"][data-tarea-id="${selectElegirTareaParaActivo.value}"]`);
-
-            if (liExistente) {
-              // Si ya existe, mostrar un alert e impedir que se agregue
-              alert("Este activo ya ha sido asignado a esta tarea.");
-              event.target.checked = false;
-              return; // Salir de la función para evitar agregar el li duplicado
-            }
-            ulactivosAsignadosPrevia.innerHTML += `
-							<li data-activo-id="${activoid_select}" data-tarea-id="${selectElegirTareaParaActivo.value}">
-								${activoNombre} - Tarea: ${selectElegirTareaParaActivo.value}
-								<button data-activo-id="${activoid_select}" class="btn-eliminar-activo-previo">Eliminar</button>
-							</li>
-						`;
-
-            document.querySelectorAll(".btn-eliminar-activo-previo").forEach(button => {
-              button.addEventListener("click", async (e) => {
-                const idactivoprevio = e.target.getAttribute('data-activo-id')
-                const idtarea = e.target.closest('li').getAttribute('data-tarea-id');
-                console.log("CLIKC A ELIMINAR ACTIVO previo INDIVIUAL, ", idactivoprevio)
-                e.target.closest('li').remove(); // Eliminar el li del DOM
-                activosSeleccionados = activosSeleccionados.filter(activo => activo.idactivo !== parseInt(idactivoprevio));
-                console.log("Activos seleccionados después de eliminar:", activosSeleccionados);
-              })
-            })
-          } else {
-            // Si se desmarca el checkbox, eliminar solo el li relacionado con el activo y la tarea específica
-            let liAEliminar = ulactivosAsignadosPrevia.querySelector(`li[data-activo-id="${activoid_select}"][data-tarea-id="${selectElegirTareaParaActivo.value}"]`);
-
-            if (liAEliminar) {
-              liAEliminar.remove();
-            }
-          }
-        }
-        else if (event.target.matches(".tarea-agregada")) {
-          /* console.log("NUEVA TAREA AÑADIDAAA")
-          const liTareaAgregada = event.target.closest("ul").querySelector('li');
-          console.log(liTareaAgregada.value) */
-        }
-
-      });
-
-      document.querySelector(".btn-agregar-recursos").addEventListener("click", function () {
-        asignarCantidadPorRecurso();
-      });
-
-      document.querySelector(".btn-agregar-activos").addEventListener("click", function () {
-        console.log("Recursos seleccionados:", recursosSeleccionados);
-        console.log("Activos seleccionados:", activosSeleccionados);
-        if (selectElegirTareaParaActivo.value == -1) {
-          console.log("eliga una tarea valida")
-          return
-        }
-        agregarActivosTarea(selectElegirTareaParaActivo.value);
-      });
-
-      document.querySelector("#btnConfirmarCambios").addEventListener("click", async (e) => {
-        e.preventDefault();
-        //global
-        estado = false;
-        const ulactivosAsignadosPrevia = $(".listaActivosAsignadosPrevia");
-        const ulActivosAsignados = $(".listaActivosAsignados");
-        // listar los activos que ya estan agregados 
-        const listarActivos = await axios.get(
-          `/transparenciawsrest/consulta/activos/plantarea/${idplantarea_generado}`
-        );
-        const dataActivosAgregados = listarActivos.data
-        console.log(
-          `activos asignadas al plan ${idplantarea_generado}:`,
-          dataActivosAgregados
-        );
-        for (let i = 0; i < activosSeleccionados.length; i++) {
-          console.log("LINEA 834: ", activosSeleccionados);
-          for (let j = 0; j < dataActivosAgregados.length; j++) {
-            console.log("dataActivosAgregados: ", dataActivosAgregados)
-            if (dataActivosAgregados[j].idactivo == activosSeleccionados[i].idactivo && dataActivosAgregados[j].idtarea == activosSeleccionados[i].idtarea) {
-              alert("este activo ya esta registrado a esa tarea .....")
-              estado = true;
-              break;
-            }
-          }
-          if (estado) {
-            return
-          }
-          console.log("SI PASE JASDAJSKDJASD")
-          const formActivos = new FormData();
-          formActivos.append("idactivo", activosSeleccionados[i].idactivo);
-          formActivos.append("idtarea", activosSeleccionados[i].idtarea);
-          const { data } = await axios.post(
-            "/" + rol + "/tareas/plantareas/activosvinculados/registrar",
-            formActivos
-          );
-          console.log("nuevos activos asignados: ", data);
-
-          const ultimaActivoAsignadoAgregadoID = await axios.get(
-            `/transparenciawsrest/consulta/activosvinculados/${data[0]?.id}`
-          );
-          console.log(
-            "la ultima activo agregada: ",
-            ultimaActivoAsignadoAgregadoID.data
-          );
-          ulActivosAsignados.innerHTML += `
-              <div>
-                <li data-activovinculado-id="${ultimaActivoAsignadoAgregadoID.data[0]?.idactivo_vinculado}" data-tarea-id="${ultimaActivoAsignadoAgregadoID.data[0]?.idtarea}">
-                  ${ultimaActivoAsignadoAgregadoID.data[0]?.descripcion} - Tarea: ${ultimaActivoAsignadoAgregadoID.data[0]?.idtarea}
-                  <button data-activovinculado-id="${ultimaActivoAsignadoAgregadoID.data[0]?.idactivo_vinculado}" class="btn-eliminar-activo">Eliminar</button>
-                </li>                  
-              </div>
-            `;
-          eliminarActivoVinculadoIndividual()
-        }
-        await planTerminado(idplantarea_generado) //ESTO CAMBIARA EL ESTADO DE BORRADOR A 0 OSEA QUE YA NO SERA BORRADOR PQ ESTARA COMPLETADO
-        activosSeleccionados = [];
-        console.log("Lista de activos seleccionados formateada: ", activosSeleccionados);
-
-        // **Limpiar el contenido de la lista de `li`**
-        ulactivosAsignadosPrevia.innerHTML = "";
-      });
-
-      document.querySelector("#form-tarea").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        let permitir = true
-        const formtarea = $("#form-tarea");
-        const ulTareasAgregadas = $(".listaTareasAgregadas");
-        const obtenerTareasExistentes = await axios.get(`/transparenciawsrest/consulta/tareasporplantarea/${idplantarea_generado}`)
-        const obtenerTareasExistentesData = obtenerTareasExistentes.data
-        for (let i = 0; i < obtenerTareasExistentesData.length; i++) {
-          if ($("#txtDescripcionTarea").value == obtenerTareasExistentesData[i].descripcion) {
-            alert("ESTA TAREA YA EXISTE, CREA OTRA PEEEEEEE")
-            permitir = false
-            break;
-          }
-
-        }
-        if (permitir) {
-          const { data } = await agregarTareas();
-          console.log("id obtenido: ", data);
-          idtarea_generado = data[0].id;
-          recursosSeleccionados.forEach(async (recurso) => {
-            recurso.idtarea = idtarea_generado;
-            console.log(recurso);
-            const formRecursos = new FormData();
-            formRecursos.append("idrecurso", recurso.idrecurso);
-            formRecursos.append("idtarea", recurso.idtarea);
-            formRecursos.append("cantidad", recurso.cantidad);
-            await axios.post(
-              "/" + rol + "/tareas/plantareas/recursosvinculados/registrar",
-              formRecursos
-            );
-          });
-
-          console.log(recursosSeleccionados);
-          recursosSeleccionados = [];
-          console.log(recursosSeleccionados);
-          const ultimaTareaAgregada = await axios.get(
-            `/transparenciawsrest/consulta/tarea/${idtarea_generado}`
-          );
-          console.log("la ultima tarea agregada: ", ultimaTareaAgregada.data);
-
-          //Agregar la tarea a la lista de tareas agregadas
-          ulTareasAgregadas.innerHTML += `
-            <div>
-              <li data-tarea-id="${ultimaTareaAgregada.data[0]?.idtarea}" class="tarea-agregada">
-                ${ultimaTareaAgregada.data[0]?.descripcion} - Tarea: ${ultimaTareaAgregada.data[0]?.idtarea}
-                <button class="btn-eliminar-tarea" data-tarea-id="${ultimaTareaAgregada.data[0]?.idtarea}">Eliminar</button>
-              </li>  						
-            </div>
-          `;
-
-          //ESTO RENDERIZA LA NUEVA TAREA HACIA EL SELECT DE SELECCIONAR TAREAR PARA ACTIVOS ( ASIGNACION DE ACTIVOS A TAREAS)
-          selectElegirTareaParaActivo.innerHTML += `
-            <option value="${ultimaTareaAgregada.data[0]?.idtarea}">${ultimaTareaAgregada.data[0]?.descripcion}</option>
-          `;
-          formtarea.reset()
-          habilitarCamposActivos(false)
-          confirmarEliminacionTarea()
-        }
-
-      });
-
-      btnGuardarPlanTarea.addEventListener("click", async () => {
-        let permitir = true
-        const descripcionPlanTarea = $("#txtDescripcionPlanTarea");
-        const selectCategorias = $("#sltCategorias");
-        if (
-          !descripcionPlanTarea.value.trim() ||
-          !/^[a-zA-Z\s]+$/.test(descripcionPlanTarea.value)
-        ) {
-          alert("Solo se permite letras y espacios");
-          return;
-        }
-        const formPlanTarea = new FormData();
-        formPlanTarea.append("descripcion", descripcionPlanTarea.value);
-        formPlanTarea.append("idcategoria", selectCategorias.value)
-        formPlanTarea.append("borrador", 1) //cuando se registra un nuevo plan se genera en forma borrador
-        //PRIMER PASO: VERIFICAR SI EL PLAN A REGISTRAR YA EXISTE
-        const obtenerPlanDeTareas = await axios.get('/transparenciawsrest/consulta/plantareas/data')
-        const obtenerPlanDeTareasData = obtenerPlanDeTareas.data
-        for (let i = 0; i < obtenerPlanDeTareasData.length; i++) {
-          if (descripcionPlanTarea.value == obtenerPlanDeTareasData[i].descripcion) {
-            alert("ESTE PLAN YA EXISTE, CREA OTRO")
-            permitir = false
-            break;
-          }
-
-        }
-        console.log("DESCRIPCION PLAN: ", descripcionPlanTarea.value)
-        console.log("ID CATEGORIA PLAN: ", selectCategorias.value)
-        if (permitir) {
-          //SEGUNDO PASO: REGISTRAR PLAN DE TAREA
-          const { data } = await axios.post(
-            "/" + rol + "/tareas/plantareas/plantarea/registrar",
-            formPlanTarea
-          );
-          console.log("ME DEBERIA TRAER EL DATO")
-          console.log(data);
-          idplantarea_generado = data[0].id ? data[0].id : -1; //EL IDPLANTAREA GENERADO DESPUES DE CREAR EL PLAN SE ASIGNARA A ESA VARIABLE PARA PDOER VINCULAR LAS NEUVAS TAREAS AGREGADAS A ESE PLAN, SI NO ESTA CREADA ENTONCES TOMARA -1 EL CUAL SI INTENTAMOS AGREGAR UNA TAREA PUES NO SE PODRA CON -1
-          console.log("idplantarea_generado: ", idplantarea_generado);
-          const planTareaObtenido = await axios.get(
-            `/transparenciawsrest/consulta/plandetareas/inconcluso/${idplantarea_generado}`
-          );
-          console.log("ID Q ME TRAJO EL PLAN RECIEN CREADO:", planTareaObtenido)
-          const planTareaObtenidoData = planTareaObtenido.data
-          idcategoria_generado = planTareaObtenidoData[0].idcategoria
-          //GUARDAR EL ID DEL PLAN TAREA SERVIRA PARA VERIFICAR CUANDO SE VA SIN HABER TERMINADO DE COMPLETAR TODO "BORRADOR".
-          window.localStorage.clear();
-          window.localStorage.setItem("idplantarea", idplantarea_generado);
-          await loadFunctions();
-          habilitarCamposTarea(false);
-        }
-      });
-
-      document.querySelector(".listaTareasAgregadas").addEventListener("click", async (e) => {
-        // Verifica si el clic ocurrió en un <li> con la clase "tarea-agregada"
-        //global
-        let idTareaSeleccionada;
-        if (e.target.classList.contains("tarea-agregada")) {
-          const btnActualizarRecurso = $(".btn-agregar-recursos")
-          btnActualizarRecurso.disabled = false;
-          const tareaId = e.target.getAttribute("data-tarea-id");
-          console.log("ID de tarea:", tareaId);
-          idTareaSeleccionada = tareaId
-          //OBTENER EL ID DE UNA TAREA CONSULTADA
-          const { data } = await axios.get(`/transparenciawsrest/consulta/tarea/${tareaId}`);
-          console.log(data)
-          //BORRAR LA LISTA DE RECURSOS SELECCIONADOS PARA GUARDAR AHI LOS RECURSOS QUE SE OBTIENEN DE UNA TAREA seleccionada
-          recursosSeleccionados = []
-          //OBTENER LOS RECURSOS DE UNA TAREA
-          const recursosObtenidos = await renderRecursosPorTarea(tareaId)
-          console.log("recursos obtenidos: ", recursosObtenidos)
-          //ESTE FOR SERVIRA PARA IR AGREGANDO LOS RECURSOS SELECCIONADOS TRAIDOS DESDE LA BD A LA LISTA
-          for (let i = 0; i < recursosObtenidos.length; i++) {
-            console.log("analizando los recursos obtenidoss")
-            const checkbox = document.querySelector(`input[type="checkbox"][value="${recursosObtenidos[i].idrecurso}"]`);
-            if (checkbox) {
-              // Añadir el data-idrecurso-vinculado al checkbox
-              checkbox.setAttribute("data-idrecurso-vinculado", recursosObtenidos[i].idrecurso_vinculado);
-
-              // Agregar el recurso al array de recursos seleccionados
-              recursosSeleccionados.push({
-                idrecurso_ot: recursosObtenidos[i].idrecurso_vinculado,
-                idrecurso: recursosObtenidos[i].idrecurso,
-                idtarea: recursosObtenidos[i].idtarea,
-                cantidad: recursosObtenidos[i].cantidad,
-              })
-            }
-
-
-          }
-          console.log("longitud: ", recursosObtenidos.length)
-          console.log("TAREAS OBTENIDAS FORMATEADAS A LISTA: ", recursosSeleccionados)
-          actualizarRecursosPorTarea()
-
-          resetUI() //BORRAR TODO LOS VALORES DE LAS CAJAS DE TEXTO POR SI ACASO
-          const descTarea = $("#txtDescripcionTarea").value = data[0].descripcion
-          const tiempoEstimadoTarea = $("#txtTiempoEstimadoTarea").value = data[0].tiempo_estimado
-          const finicio = $("#fecha-inicio").value = data[0].fecha_inicio
-          const fvencimiento = $("#fecha-vencimiento").value = data[0].fecha_vencimiento
-          const intervaloTarea = $("#txtIntervaloTarea").value = data[0].cant_intervalo
-          const frecuenciaTarea = $("#txtFrecuenciaTarea").value = data[0].frecuencia
-          const tipoPrioridadTarea = $("#tipoPrioridadTarea").value = data[0].idtipo_prioridad
-          botonCambiado = true
-          if (botonCambiado) {
-            // Ocultar el botón de guardar
-            const btnGuardar = document.querySelector("#btnGuardarTarea");
-            btnGuardar.style.display = "none"; // Ocultar el botón
-
-
-            // Verificar si ya existe el botón de actualizar y eliminarlo
             const btnActualizarExistente = document.querySelector("#btnActualizarTarea");
             if (btnActualizarExistente) {
               btnActualizarExistente.remove();
@@ -1069,104 +466,711 @@
               btnCancelarExistente.remove();
             }
 
-            //ME QUEDE ACA , YA FUNCIONA EL APARICIONAMIENTO DEL BOTON ACTUALIZAR Y CANCELAR
-            // CREAR UN BOTÓN ACTUALIZAR
-            const nuevoBtnActualizar = document.createElement("button");
-            nuevoBtnActualizar.id = "btnActualizarTarea";
-            nuevoBtnActualizar.innerText = "Actualizar"; // Asignar texto antes de agregar al DOM
+            btnGuardar.style.display = "inline-block";
+            resetUI()
 
-            // CREAR UN BOTÓN CANCELAR
-            const nuevoBtnCancelar = document.createElement("button");
-            nuevoBtnCancelar.id = "btnCancelarActualizacion";
-            nuevoBtnCancelar.innerText = "Cancelar"; // Asignar texto correctamente
+            if (tareasRestantes === 0) {
+              // Si ya no hay tareas, deshabilitar los campos de activos
+              habilitarCamposActivos(true);
+            } else {
+              habilitarCamposActivos(false);
+            }
+          }
+        });
+      });
+    }
 
-            // Insertar los nuevos botones en el DOM
-            btnGuardar.parentElement.appendChild(nuevoBtnActualizar);
-            btnGuardar.parentElement.appendChild(nuevoBtnCancelar);
+    async function renderTareasAgregadas() {
+      //RENDER UN SELECT QUE LISTE LAS TAREAS PARA ASIGNARLAS A CADA ACTIVO
+      const ullistaTareasAgregadas = $(".listaTareasAgregadas")
+      const { data } = await axios.get(`/transparenciawsrest/consulta/tareasporplantarea/${idplantarea_generado}`)
+      console.log(data)
+      for (let i = 0; i < data.length; i++) {
+        ullistaTareasAgregadas.innerHTML += `
+						<li data-tarea-id="${data[i].idtarea}" class="tarea-agregada">
+							${data[i].descripcion} - Tarea: ${data[i].idtarea}
+							<button class="btn-eliminar-tarea" data-tarea-id="${data[i].idtarea}">Eliminar</button>
+						</li>	
+					`
+      }
+      if (data.length > 0) {
+        habilitarCamposActivos(false)
+      } else {
+        habilitarCamposActivos(true)
+      }
 
-            // Agregar evento para el botón de actualizar
-            nuevoBtnActualizar.addEventListener("click", async (e) => {
-              e.preventDefault();
-              if (!idTareaSeleccionada) {
-                console.error("No hay ninguna tarea seleccionada.");
-                return;
-              }
-              console.log("HOLA SOY EL BOTÓN ACTUALIZAR XD", data[0].idtarea);
-              const idTareaActualizada = await actualizarTarea(data[0].idtarea)
-              console.log("idTareaActualizada", idTareaActualizada)
-              const tareaActualizada = await axios.get(`/transparenciawsrest/consulta/tarea/${idTareaActualizada.data[0]?.id}`)
-              console.log("tareaActualizada: ", tareaActualizada)
-              const liTarea = document.querySelector(`li[data-tarea-id='${tareaActualizada.data[0].idtarea}']`);
+      confirmarEliminacionTarea()
 
-              if (liTarea) {
-                // Actualizar el texto del <li> con la nueva descripción
-                liTarea.innerHTML = `
-                  ${tareaActualizada.data[0].descripcion} - Tarea: ${tareaActualizada.data[0].idtarea}
-                  <button class="btn-eliminar-tarea" data-tarea-id="${tareaActualizada.data[0].idtarea}">Eliminar</button>
-                `;
+    }
 
-                confirmarEliminacionTarea()
-              }
 
-              guardarRecursosActualizados(idTareaSeleccionada)
-              btnActualizarRecurso.disabled = true;
+    function eliminarActivosDeTarea(idtarea) {
+      console.log("entrando a la funcion eliminarActivosDeTarea, id tarea: ", idtarea)
+      const activos = document.querySelectorAll(`.listaActivosAsignados li[data-tarea-id="${idtarea}"]`);
+      console.log("ID TAREA JALADOOO: ", idtarea)
+      console.log("activos jalados: ", activos)
+      activos.forEach(activo => {
+        console.log("recorriendo los activos por tarea:", activo)
+        activo.remove(); // Eliminar cada activo del DOM
+      });
+    }
 
-              // Mostrar nuevamente el botón de guardar
-              btnGuardar.style.display = "inline-block";
+    function eliminarTareaDelSelect(idtarea) {
+      const selectElegirTareaParaActivo = document.querySelector("#elegirTareaParaActivo");
+      const optionToRemove = selectElegirTareaParaActivo.querySelector(`option[value="${idtarea}"]`);
+      if (optionToRemove) {
+        optionToRemove.remove(); // Eliminar el option del DOM
+      }
+    }
 
-              // Eliminar los botones de actualizar y cancelar
-              nuevoBtnActualizar.remove();
-              nuevoBtnCancelar.remove();
-              botonCambiado = false;
-              formtarea.reset()
+    async function renderTareasSelect() {
+      //RENDER UN SELECT QUE LISTE LAS TAREAS PARA ASIGNARLAS A CADA ACTIVO
+      console.log("ID PLANTAAREA GENERADO: ", idplantarea_generado)
+      const { data } = await axios.get(
+        `/transparenciawsrest/consulta/tareasporplantarea/${idplantarea_generado}`
+      );
+      console.log(
+        `tareas asignadas al plan ${idplantarea_generado}:`,
+        data
+      );
 
-            });
+      //const ulTareasAgregadas = $(".listaTareasAgregadas");
+      const selectElegirTareaParaActivo = $("#elegirTareaParaActivo");
 
-            // Agregar evento para el botón de cancelar
-            nuevoBtnCancelar.addEventListener("click", async (e) => {
-              e.preventDefault();
-              console.log("HOLA SOY EL BOTÓN CANCELAR XD");
-              btnActualizarRecurso.disabled = true;
+      //ulTareasAgregadas.innerHTML = "";
+      selectElegirTareaParaActivo.innerHTML =
+        "<option value='-1'>Seleccione una tarea</option>"; // Opción predeterminada
 
-              // Mostrar nuevamente el botón de guardar
-              btnGuardar.style.display = "inline-block";
+      for (let i = 0; i < data.length; i++) {
+        /* ulTareasAgregadas.innerHTML += `
+          <li data-tarea-id="${data[i].idtarea}">${data[i].descripcion}</li>
+        `; */
+        selectElegirTareaParaActivo.innerHTML += `
+						<option value="${data[i].idtarea}">${data[i].descripcion}</option>
+					`;
+      }
+    }
 
-              // Eliminar los botones de actualizar y cancelar
-              nuevoBtnActualizar.remove();
-              nuevoBtnCancelar.remove();
+    async function renderRecursosPorTarea(idtarea) {
+      const { data } = await axios.get(`/transparenciawsrest/consulta/recursos/tarea/${idtarea}`)
+      return data
+    }
 
-              //DESMARKAR TODOS LOS CHECKBOXES
-              document.querySelectorAll(".recurso-checkbox").forEach(recursoChk => {
-                const idRecursoChk = recursoChk.getAttribute("data-recurso-id")
-                const inputCantidad = document.querySelector(`input[data-idrecurso-cantidad="${idRecursoChk}"]`);
-                recursoChk.checked = false;
-                inputCantidad.disabled = true;
-                inputCantidad.value = "";
-              });
-              // Restablecer el estado de botonCambiado a false
-              botonCambiado = false;
-              formtarea.reset()
-            });
+    async function actualizarTarea(idtareaObtenida) {
+      const tipoPrioridadTarea = $("#tipoPrioridadTarea").value;
+      const descripcionTarea = $("#txtDescripcionTarea").value;
+      const intervaloTarea = $("#txtIntervaloTarea").value;
+      const frecuenciaTarea = $("#txtFrecuenciaTarea").value;
+      const fechaInicioTarea = $("#fecha-inicio").value;
+      const fechaVencimiento = $("#fecha-vencimiento").value;
 
-            // Salir de la función si botonCambiado es true
-            return;
+      // Crear objeto JSON con los datos
+      const datos = {
+        idtarea: idtareaObtenida,
+        idtipo_prioridad: tipoPrioridadTarea,
+        descripcion: descripcionTarea,
+        fecha_inicio: fechaInicioTarea,
+        fecha_vencimiento: fechaVencimiento,
+        cant_intervalo: intervaloTarea,
+        frecuencia: frecuenciaTarea,
+        idestado: 1 // Cambia esto si es necesario
+      };
 
-          } else { }
+      try {
+        // Hacer la petición PUT con JSON
+        const data = await axios.put(
+          "/" + rol + "/tareas/plantareas/tarea/actualizar",
+          datos,  // Enviar datos como JSON
+          {
+            headers: {
+              'Content-Type': 'application/json', // Header para JSON
+            }
+          }
+        );
+
+        return data; // id
+      } catch (error) {
+        console.error('Error al actualizar la tarea:', error);
+      }
+    }
+
+    async function agregarActivosTarea(idTareaElegida) {
+      document.querySelectorAll(".activo-checkbox:checked").forEach(function (checkbox) {
+        const idactivo = checkbox.value;
+        activosSeleccionados.push({
+          idactivo: parseInt(idactivo),
+          idtarea: idTareaElegida,
+        });
+      });
+      console.log(idTareaElegida)
+      console.log(activosSeleccionados);
+      document
+        .querySelectorAll('input[type="checkbox"]')
+        .forEach((checkbox) => {
+          checkbox.checked = false;
+        });
+    }
+
+    async function planTerminado(idplantarea) {
+      console.log("ID PLAN A ACTUALIZAR EL BORRADOR; ", idplantarea)
+      const datosActualizar = {
+        idplantarea: idplantarea,
+        borrador: 0 // EL PLAN YA NO SERA BORRADOR
+      }
+      console.log("ANTES DE EJECUTARRRRRRR: ", datosActualizar)
+      const cambio = await fetch(`/${rol}/tareas/plantareas/actualizar`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datosActualizar) })
+      console.log("cambio de estado el plan?: ", await cambio.json())
+    }
+
+    async function guardarRecursosActualizados(idtarea) {
+
+      const recursosParaActualizar = [];
+      const recursosParaAgregar = [];
+
+      document.querySelectorAll(".recurso-checkbox:checked").forEach(function (checkbox) {
+        const recursoid = checkbox.value;
+        const cantidad = parseInt(
+          checkbox.closest("tr").querySelector('input[type="number"]').value
+        );
+
+        if (isNaN(cantidad) || cantidad <= 0) {
+          alert("Elige una cantidad válida de recurso");
+          return;
+        }
+
+        const idrecurso_vinculado = checkbox.getAttribute("data-idrecurso-vinculado");
+        console.log("idrecurso_vinculado data-idrecurso-vinculado:", idrecurso_vinculado)
+        if (idrecurso_vinculado) {
+          // Si tiene un idrecurso_vinculado, es para actualizar
+          recursosParaActualizar.push({
+            idrecurso_vinculado: parseInt(idrecurso_vinculado),
+            idrecurso: parseInt(recursoid),
+            idtarea: parseInt(idtarea),
+            cantidad: parseInt(cantidad),
+          });
+        } else {
+          // Si no tiene idrecurso_vinculado, es para agregar
+          recursosParaAgregar.push({
+            idrecurso: parseInt(recursoid),
+            idtarea: parseInt(idtarea),
+            cantidad: parseInt(cantidad),
+          });
 
         }
       });
 
-      function resetUI() {
-        $("#txtDescripcionTarea").value = null
-        $("#txtTiempoEstimadoTarea").value = null
-        $("#fecha-inicio").value = null
-        $("#fecha-vencimiento").value = null
-        $("#txtIntervaloTarea").value = null
-        $("#txtFrecuenciaTarea").value = null
-        $("#tipoPrioridadTarea").value = null
+      console.log("Recursos para actualizar:", recursosParaActualizar);
+      console.log("Recursos para agregar:", recursosParaAgregar);
+
+      // Realizar las peticiones PUT para actualizar
+      for (const recurso of recursosParaActualizar) {
+        console.log("PASADO POR EL RECURSOS PAA ACTUALIZAR")
+        const recursosActualizar = {
+          idrecurso_vinculado: recurso.idrecurso_vinculado,
+          idrecurso: recurso.idrecurso,
+          idtarea: recurso.idtarea,
+          cantidad: recurso.cantidad
+        }
+        const data = await axios.put("/" + rol + `/tareas/plantareas/recursosvinculados/actualizar`, recursosActualizar, { headers: { 'Content-Type': 'application/json' } });
+        console.log("recursos actualizados peee: ", data)
+      }
+      console.log("PASE DE YA TUSABE")
+      // Realizar las peticiones POST para agregar
+      for (const recurso of recursosParaAgregar) {
+        console.log("LOOOOOOOOOOOOOOOOOOOOL")
+
+        let recursosAgregar = new FormData()
+        recursosAgregar.append("idrecurso", parseInt(recurso.idrecurso))
+        recursosAgregar.append("idtarea", parseInt(recurso.idtarea)),
+          recursosAgregar.append("cantidad", parseInt(recurso.cantidad))
+        const data = await axios.post("/" + rol + `/tareas/plantareas/recursosvinculados/registrar`, recursosAgregar);
+        console.log("RECURSO RECIEN AGREGADO: ", data)
+      }
+      desmarcarCheckboxesYLimpiarCantidad()
+      alert("Recursos actualizados/agregados correctamente.");
+    }
+
+    async function actualizarRecursosPorTarea() {
+      document.querySelectorAll(".recurso-checkbox").forEach(recursoChk => {
+        const idRecursoChk = recursoChk.getAttribute("data-recurso-id")
+        const recursoEncontrado = recursosSeleccionados.find(recurso => recurso.idrecurso == idRecursoChk)
+        const inputCantidad = document.querySelector(`input[data-idrecurso-cantidad="${idRecursoChk}"]`);
+        if (recursoEncontrado) {
+          recursoChk.checked = true;
+          inputCantidad.disabled = false;
+          inputCantidad.value = recursoEncontrado.cantidad;
+        } else {
+          recursoChk.checked = false;
+          inputCantidad.disabled = true;
+          inputCantidad.value = "";
+        }
+      });
+    }
+
+    function desmarcarCheckboxesYLimpiarCantidad() {
+      document.querySelectorAll(".recurso-checkbox").forEach(checkbox => {
+        checkbox.checked = false;  // Desmarcar el checkbox
+        const inputCantidad = checkbox.closest("tr").querySelector('input[type="number"]');
+        inputCantidad.value = "";  // Limpiar el valor del input de cantidad
+        inputCantidad.disabled = true;  // Deshabilitar el input
+      });
+    }
+
+    selectElegirTareaParaActivo.addEventListener("change", function () {
+      console.log("Select tarea cambiando ...");
+
+      // Actualizar todos los li con la nueva tarea seleccionada
+      document.querySelectorAll(".activo-checkbox:checked").forEach((checkbox) => {
+        const activoid = checkbox.value;
+        const liExistente = $(".listaActivosAsignadosPrevia").querySelector(`li[data-activo-id="${activoid}"]`);
+
+        if (liExistente) {
+          liExistente.innerHTML = `${liExistente.textContent.split(' - ')[0]} - Tarea: ${selectElegirTareaParaActivo.value}`;
+          liExistente.setAttribute("data-tarea-id", selectElegirTareaParaActivo.value);
+        }
+      });
+
+      console.log("li tarea cambiada");
+    });
+
+    document.body.addEventListener("change", function (event) {
+      if (event.target.matches(".recurso-checkbox")) {
+        const btnGuardarRecursos = $(".btn-agregar-recursos")
+        //const recursoid_select = event.target.value;
+        //const ulrecursos = $("#listaRecursosAsignados")
+        //const recursoNombre = event.target.closest('tr').querySelector('td:nth-child(2)').textContent; // Obtén el nombre del recurso desde la tabla
+        const cantidadInput = event.target
+          .closest("tr")
+          .querySelector('input[type="number"]');
+        const cantidad = cantidadInput.value;
+
+        if (event.target.checked) {
+          cantidadInput.disabled = false;
+          cantidadInput.value = 1;
+        } else {
+          cantidadInput.disabled = true;
+          cantidadInput.value = null;
+        }
+
+        const checkboxesSeleccionados = document.querySelectorAll(
+          ".recurso-checkbox:checked"
+        ).length;
+
+        // Habilitar el botón si hay al menos un checkbox seleccionado, deshabilitar si no hay ninguno
+        if (checkboxesSeleccionados > 0) {
+          //          txtBuscarRecurso.disabled = true;
+          btnGuardarRecursos.disabled = false;
+        } else {
+          //          txtBuscarRecurso.disabled = false
+          btnGuardarRecursos.disabled = true;
+        }
+      }
+      else if (event.target.matches(".activo-checkbox")) {
+        const activoid_select = event.target.value;
+        const ulactivosAsignadosPrevia = $(".listaActivosAsignadosPrevia");
+        const activoNombre = event.target.closest("tr").querySelector("td:nth-child(2)").textContent;
+
+        if (event.target.checked) {
+          console.log("hola")
+          console.log(activosSeleccionados);
+          if (selectElegirTareaParaActivo.value == null || selectElegirTareaParaActivo.value == -1) {
+            alert("Por favor, elija una tarea válida antes de agregar activos.");
+            event.target.checked = false;
+            return; // Salir de la función si no hay tarea seleccionada
+          }
+          let liExistente = ulactivosAsignadosPrevia.querySelector(`li[data-activo-id="${activoid_select}"][data-tarea-id="${selectElegirTareaParaActivo.value}"]`);
+
+          if (liExistente) {
+            // Si ya existe, mostrar un alert e impedir que se agregue
+            alert("Este activo ya ha sido asignado a esta tarea.");
+            event.target.checked = false;
+            return; // Salir de la función para evitar agregar el li duplicado
+          }
+          ulactivosAsignadosPrevia.innerHTML += `
+							<li data-activo-id="${activoid_select}" data-tarea-id="${selectElegirTareaParaActivo.value}">
+								${activoNombre} - Tarea: ${selectElegirTareaParaActivo.value}
+								<button data-activo-id="${activoid_select}" class="btn-eliminar-activo-previo">Eliminar</button>
+							</li>
+						`;
+
+          document.querySelectorAll(".btn-eliminar-activo-previo").forEach(button => {
+            button.addEventListener("click", async (e) => {
+              const idactivoprevio = e.target.getAttribute('data-activo-id')
+              const idtarea = e.target.closest('li').getAttribute('data-tarea-id');
+              console.log("CLIKC A ELIMINAR ACTIVO previo INDIVIUAL, ", idactivoprevio)
+              e.target.closest('li').remove(); // Eliminar el li del DOM
+              activosSeleccionados = activosSeleccionados.filter(activo => activo.idactivo !== parseInt(idactivoprevio));
+              console.log("Activos seleccionados después de eliminar:", activosSeleccionados);
+            })
+          })
+        } else {
+          // Si se desmarca el checkbox, eliminar solo el li relacionado con el activo y la tarea específica
+          let liAEliminar = ulactivosAsignadosPrevia.querySelector(`li[data-activo-id="${activoid_select}"][data-tarea-id="${selectElegirTareaParaActivo.value}"]`);
+
+          if (liAEliminar) {
+            liAEliminar.remove();
+          }
+        }
+      }
+      else if (event.target.matches(".tarea-agregada")) {
+        /* console.log("NUEVA TAREA AÑADIDAAA")
+        const liTareaAgregada = event.target.closest("ul").querySelector('li');
+        console.log(liTareaAgregada.value) */
+      }
+
+    });
+
+    document.querySelector(".btn-agregar-recursos").addEventListener("click", function () {
+      asignarCantidadPorRecurso();
+      //txtBuscarRecurso.value = ''
+      //txtBuscarRecurso.disabled = false;
+
+    });
+
+    document.querySelector(".btn-agregar-activos").addEventListener("click", function () {
+      console.log("Recursos seleccionados:", recursosSeleccionados);
+      console.log("Activos seleccionados:", activosSeleccionados);
+      if (selectElegirTareaParaActivo.value == -1) {
+        console.log("eliga una tarea valida")
+        return
+      }
+      agregarActivosTarea(selectElegirTareaParaActivo.value);
+    });
+
+    document.querySelector("#btnConfirmarCambios").addEventListener("click", async (e) => {
+      e.preventDefault();
+      //global
+      estado = false;
+      const ulactivosAsignadosPrevia = $(".listaActivosAsignadosPrevia");
+      const ulActivosAsignados = $(".listaActivosAsignados");
+      // listar los activos que ya estan agregados 
+      const listarActivos = await axios.get(
+        `/transparenciawsrest/consulta/activos/plantarea/${idplantarea_generado}`
+      );
+      const dataActivosAgregados = listarActivos.data
+      console.log(
+        `activos asignadas al plan ${idplantarea_generado}:`,
+        dataActivosAgregados
+      );
+      for (let i = 0; i < activosSeleccionados.length; i++) {
+        console.log("LINEA 834: ", activosSeleccionados);
+        for (let j = 0; j < dataActivosAgregados.length; j++) {
+          console.log("dataActivosAgregados: ", dataActivosAgregados)
+          if (dataActivosAgregados[j].idactivo == activosSeleccionados[i].idactivo && dataActivosAgregados[j].idtarea == activosSeleccionados[i].idtarea) {
+            alert("este activo ya esta registrado a esa tarea .....")
+            estado = true;
+            break;
+          }
+        }
+        if (estado) {
+          return
+        }
+        console.log("SI PASE JASDAJSKDJASD")
+        const formActivos = new FormData();
+        formActivos.append("idactivo", activosSeleccionados[i].idactivo);
+        formActivos.append("idtarea", activosSeleccionados[i].idtarea);
+        const { data } = await axios.post(
+          "/" + rol + "/tareas/plantareas/activosvinculados/registrar",
+          formActivos
+        );
+        console.log("nuevos activos asignados: ", data);
+
+        const ultimaActivoAsignadoAgregadoID = await axios.get(
+          `/transparenciawsrest/consulta/activosvinculados/${data[0]?.id}`
+        );
+        console.log(
+          "la ultima activo agregada: ",
+          ultimaActivoAsignadoAgregadoID.data
+        );
+        ulActivosAsignados.innerHTML += `
+              <div>
+                <li data-activovinculado-id="${ultimaActivoAsignadoAgregadoID.data[0]?.idactivo_vinculado}" data-tarea-id="${ultimaActivoAsignadoAgregadoID.data[0]?.idtarea}">
+                  ${ultimaActivoAsignadoAgregadoID.data[0]?.descripcion} - Tarea: ${ultimaActivoAsignadoAgregadoID.data[0]?.idtarea}
+                  <button data-activovinculado-id="${ultimaActivoAsignadoAgregadoID.data[0]?.idactivo_vinculado}" class="btn-eliminar-activo">Eliminar</button>
+                </li>                  
+              </div>
+            `;
+        eliminarActivoVinculadoIndividual()
+      }
+      await planTerminado(idplantarea_generado) //ESTO CAMBIARA EL ESTADO DE BORRADOR A 0 OSEA QUE YA NO SERA BORRADOR PQ ESTARA COMPLETADO
+      activosSeleccionados = [];
+      console.log("Lista de activos seleccionados formateada: ", activosSeleccionados);
+
+      // **Limpiar el contenido de la lista de `li`**
+      ulactivosAsignadosPrevia.innerHTML = "";
+    });
+
+    document.querySelector("#form-tarea").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      let permitir = true
+      const formtarea = $("#form-tarea");
+      const ulTareasAgregadas = $(".listaTareasAgregadas");
+      const obtenerTareasExistentes = await axios.get(`/transparenciawsrest/consulta/tareasporplantarea/${idplantarea_generado}`)
+      const obtenerTareasExistentesData = obtenerTareasExistentes.data
+      for (let i = 0; i < obtenerTareasExistentesData.length; i++) {
+        if ($("#txtDescripcionTarea").value == obtenerTareasExistentesData[i].descripcion) {
+          alert("ESTA TAREA YA EXISTE, CREA OTRA PEEEEEEE")
+          permitir = false
+          break;
+        }
+
+      }
+      if (permitir) {
+        const { data } = await agregarTareas();
+        console.log("id obtenido: ", data);
+        idtarea_generado = data[0].id;
+        recursosSeleccionados.forEach(async (recurso) => {
+          recurso.idtarea = idtarea_generado;
+          console.log(recurso);
+          const formRecursos = new FormData();
+          formRecursos.append("idrecurso", recurso.idrecurso);
+          formRecursos.append("idtarea", recurso.idtarea);
+          formRecursos.append("cantidad", recurso.cantidad);
+          await axios.post(
+            "/" + rol + "/tareas/plantareas/recursosvinculados/registrar",
+            formRecursos
+          );
+        });
+
+        console.log(recursosSeleccionados);
+        recursosSeleccionados = [];
+        console.log(recursosSeleccionados);
+        const ultimaTareaAgregada = await axios.get(
+          `/transparenciawsrest/consulta/tarea/${idtarea_generado}`
+        );
+        console.log("la ultima tarea agregada: ", ultimaTareaAgregada.data);
+
+        //Agregar la tarea a la lista de tareas agregadas
+        ulTareasAgregadas.innerHTML += `
+            <div>
+              <li data-tarea-id="${ultimaTareaAgregada.data[0]?.idtarea}" class="tarea-agregada">
+                ${ultimaTareaAgregada.data[0]?.descripcion} - Tarea: ${ultimaTareaAgregada.data[0]?.idtarea}
+                <button class="btn-eliminar-tarea" data-tarea-id="${ultimaTareaAgregada.data[0]?.idtarea}">Eliminar</button>
+              </li>  						
+            </div>
+          `;
+
+        //ESTO RENDERIZA LA NUEVA TAREA HACIA EL SELECT DE SELECCIONAR TAREAR PARA ACTIVOS ( ASIGNACION DE ACTIVOS A TAREAS)
+        selectElegirTareaParaActivo.innerHTML += `
+            <option value="${ultimaTareaAgregada.data[0]?.idtarea}">${ultimaTareaAgregada.data[0]?.descripcion}</option>
+          `;
+        formtarea.reset()
+        habilitarCamposActivos(false)
+        confirmarEliminacionTarea()
+      }
+
+    });
+
+    btnGuardarPlanTarea.addEventListener("click", async () => {
+      let permitir = true
+      const descripcionPlanTarea = $("#txtDescripcionPlanTarea");
+      if (
+        !descripcionPlanTarea.value.trim() ||
+        !/^[a-zA-Z\s]+$/.test(descripcionPlanTarea.value)
+      ) {
+        alert("Solo se permite letras y espacios");
+        return;
+      }
+      const formPlanTarea = new FormData();
+      formPlanTarea.append("descripcion", descripcionPlanTarea.value);
+      formPlanTarea.append("borrador", 1) //cuando se registra un nuevo plan se genera en forma borrador
+      //PRIMER PASO: VERIFICAR SI EL PLAN A REGISTRAR YA EXISTE
+      const obtenerPlanDeTareas = await axios.get('/transparenciawsrest/consulta/plantareas/data')
+      const obtenerPlanDeTareasData = obtenerPlanDeTareas.data
+      for (let i = 0; i < obtenerPlanDeTareasData.length; i++) {
+        if (descripcionPlanTarea.value == obtenerPlanDeTareasData[i].descripcion) {
+          alert("ESTE PLAN YA EXISTE, CREA OTRO")
+          permitir = false
+          break;
+        }
+
+      }
+      console.log("DESCRIPCION PLAN: ", descripcionPlanTarea.value)
+      if (permitir) {
+        //SEGUNDO PASO: REGISTRAR PLAN DE TAREA
+        const { data } = await axios.post(
+          "/" + rol + "/tareas/plantareas/plantarea/registrar",
+          formPlanTarea
+        );
+        console.log("ME DEBERIA TRAER EL DATO")
+        console.log(data);
+        idplantarea_generado = data[0].id ? data[0].id : -1; //EL IDPLANTAREA GENERADO DESPUES DE CREAR EL PLAN SE ASIGNARA A ESA VARIABLE PARA PDOER VINCULAR LAS NEUVAS TAREAS AGREGADAS A ESE PLAN, SI NO ESTA CREADA ENTONCES TOMARA -1 EL CUAL SI INTENTAMOS AGREGAR UNA TAREA PUES NO SE PODRA CON -1
+        console.log("idplantarea_generado: ", idplantarea_generado);
+        const planTareaObtenido = await axios.get(
+          `/transparenciawsrest/consulta/plandetareas/inconcluso/${idplantarea_generado}`
+        );
+        console.log("ID Q ME TRAJO EL PLAN RECIEN CREADO:", planTareaObtenido)
+        //GUARDAR EL ID DEL PLAN TAREA SERVIRA PARA VERIFICAR CUANDO SE VA SIN HABER TERMINADO DE COMPLETAR TODO "BORRADOR".
+        window.localStorage.clear();
+        window.localStorage.setItem("idplantarea", idplantarea_generado);
+        await loadFunctions();
+        habilitarCamposTarea(false);
       }
     });
-  </script>
+
+    document.querySelector(".listaTareasAgregadas").addEventListener("click", async (e) => {
+      // Verifica si el clic ocurrió en un <li> con la clase "tarea-agregada"
+      //global
+      let idTareaSeleccionada;
+      if (e.target.classList.contains("tarea-agregada")) {
+        const btnActualizarRecurso = $(".btn-agregar-recursos")
+        btnActualizarRecurso.disabled = false;
+        const tareaId = e.target.getAttribute("data-tarea-id");
+        console.log("ID de tarea:", tareaId);
+        idTareaSeleccionada = tareaId
+        //OBTENER EL ID DE UNA TAREA CONSULTADA
+        const { data } = await axios.get(`/transparenciawsrest/consulta/tarea/${tareaId}`);
+        console.log(data)
+        //BORRAR LA LISTA DE RECURSOS SELECCIONADOS PARA GUARDAR AHI LOS RECURSOS QUE SE OBTIENEN DE UNA TAREA seleccionada
+        recursosSeleccionados = []
+        //OBTENER LOS RECURSOS DE UNA TAREA
+        const recursosObtenidos = await renderRecursosPorTarea(tareaId)
+        console.log("recursos obtenidos: ", recursosObtenidos)
+        //ESTE FOR SERVIRA PARA IR AGREGANDO LOS RECURSOS SELECCIONADOS TRAIDOS DESDE LA BD A LA LISTA
+        for (let i = 0; i < recursosObtenidos.length; i++) {
+          console.log("analizando los recursos obtenidoss")
+          const checkbox = document.querySelector(`input[type="checkbox"][value="${recursosObtenidos[i].idrecurso}"]`);
+          if (checkbox) {
+            // Añadir el data-idrecurso-vinculado al checkbox
+            checkbox.setAttribute("data-idrecurso-vinculado", recursosObtenidos[i].idrecurso_vinculado);
+
+            // Agregar el recurso al array de recursos seleccionados
+            recursosSeleccionados.push({
+              idrecurso_ot: recursosObtenidos[i].idrecurso_vinculado,
+              idrecurso: recursosObtenidos[i].idrecurso,
+              idtarea: recursosObtenidos[i].idtarea,
+              cantidad: recursosObtenidos[i].cantidad,
+            })
+          }
+
+
+        }
+        console.log("longitud: ", recursosObtenidos.length)
+        console.log("TAREAS OBTENIDAS FORMATEADAS A LISTA: ", recursosSeleccionados)
+        actualizarRecursosPorTarea()
+
+        resetUI() //BORRAR TODO LOS VALORES DE LAS CAJAS DE TEXTO POR SI ACASO
+        const descTarea = $("#txtDescripcionTarea").value = data[0].descripcion
+        const finicio = $("#fecha-inicio").value = data[0].fecha_inicio
+        const fvencimiento = $("#fecha-vencimiento").value = data[0].fecha_vencimiento
+        const intervaloTarea = $("#txtIntervaloTarea").value = data[0].cant_intervalo
+        const frecuenciaTarea = $("#txtFrecuenciaTarea").value = data[0].frecuencia
+        const tipoPrioridadTarea = $("#tipoPrioridadTarea").value = data[0].idtipo_prioridad
+        botonCambiado = true
+        if (botonCambiado) {
+          // Ocultar el botón de guardar
+          const btnGuardar = document.querySelector("#btnGuardarTarea");
+          btnGuardar.style.display = "none"; // Ocultar el botón
+
+
+          // Verificar si ya existe el botón de actualizar y eliminarlo
+          const btnActualizarExistente = document.querySelector("#btnActualizarTarea");
+          if (btnActualizarExistente) {
+            btnActualizarExistente.remove();
+          }
+
+          // Verificar si ya existe el botón de cancelar y eliminarlo
+          const btnCancelarExistente = document.querySelector("#btnCancelarActualizacion");
+          if (btnCancelarExistente) {
+            btnCancelarExistente.remove();
+          }
+
+          //ME QUEDE ACA , YA FUNCIONA EL APARICIONAMIENTO DEL BOTON ACTUALIZAR Y CANCELAR
+          // CREAR UN BOTÓN ACTUALIZAR
+          const nuevoBtnActualizar = document.createElement("button");
+          nuevoBtnActualizar.id = "btnActualizarTarea";
+          nuevoBtnActualizar.innerText = "Actualizar"; // Asignar texto antes de agregar al DOM
+
+          // CREAR UN BOTÓN CANCELAR
+          const nuevoBtnCancelar = document.createElement("button");
+          nuevoBtnCancelar.id = "btnCancelarActualizacion";
+          nuevoBtnCancelar.innerText = "Cancelar"; // Asignar texto correctamente
+
+          // Insertar los nuevos botones en el DOM
+          btnGuardar.parentElement.appendChild(nuevoBtnActualizar);
+          btnGuardar.parentElement.appendChild(nuevoBtnCancelar);
+
+          // Agregar evento para el botón de actualizar
+          nuevoBtnActualizar.addEventListener("click", async (e) => {
+            e.preventDefault();
+            if (!idTareaSeleccionada) {
+              console.error("No hay ninguna tarea seleccionada.");
+              return;
+            }
+            console.log("HOLA SOY EL BOTÓN ACTUALIZAR XD", data[0].idtarea);
+            const idTareaActualizada = await actualizarTarea(data[0].idtarea)
+            console.log("idTareaActualizada", idTareaActualizada)
+            const tareaActualizada = await axios.get(`/transparenciawsrest/consulta/tarea/${idTareaActualizada.data[0]?.id}`)
+            console.log("tareaActualizada: ", tareaActualizada)
+            const liTarea = document.querySelector(`li[data-tarea-id='${tareaActualizada.data[0].idtarea}']`);
+
+            if (liTarea) {
+              // Actualizar el texto del <li> con la nueva descripción
+              liTarea.innerHTML = `
+                  ${tareaActualizada.data[0].descripcion} - Tarea: ${tareaActualizada.data[0].idtarea}
+                  <button class="btn-eliminar-tarea" data-tarea-id="${tareaActualizada.data[0].idtarea}">Eliminar</button>
+                `;
+
+              confirmarEliminacionTarea()
+            }
+
+            guardarRecursosActualizados(idTareaSeleccionada)
+            btnActualizarRecurso.disabled = true;
+
+            // Mostrar nuevamente el botón de guardar
+            btnGuardar.style.display = "inline-block";
+
+            // Eliminar los botones de actualizar y cancelar
+            nuevoBtnActualizar.remove();
+            nuevoBtnCancelar.remove();
+            botonCambiado = false;
+            formtarea.reset()
+
+          });
+
+          // Agregar evento para el botón de cancelar
+          nuevoBtnCancelar.addEventListener("click", async (e) => {
+            e.preventDefault();
+            console.log("HOLA SOY EL BOTÓN CANCELAR XD");
+            btnActualizarRecurso.disabled = true;
+
+            // Mostrar nuevamente el botón de guardar
+            btnGuardar.style.display = "inline-block";
+
+            // Eliminar los botones de actualizar y cancelar
+            nuevoBtnActualizar.remove();
+            nuevoBtnCancelar.remove();
+
+            //DESMARKAR TODOS LOS CHECKBOXES
+            document.querySelectorAll(".recurso-checkbox").forEach(recursoChk => {
+              const idRecursoChk = recursoChk.getAttribute("data-recurso-id")
+              const inputCantidad = document.querySelector(`input[data-idrecurso-cantidad="${idRecursoChk}"]`);
+              recursoChk.checked = false;
+              inputCantidad.disabled = true;
+              inputCantidad.value = "";
+            });
+            // Restablecer el estado de botonCambiado a false
+            botonCambiado = false;
+            formtarea.reset()
+          });
+
+          // Salir de la función si botonCambiado es true
+          return;
+
+        } else { }
+
+      }
+    });
+
+    function resetUI() {
+      $("#txtDescripcionTarea").value = null
+      $("#fecha-inicio").value = null
+      $("#fecha-vencimiento").value = null
+      $("#txtIntervaloTarea").value = null
+      $("#txtFrecuenciaTarea").value = null
+      $("#tipoPrioridadTarea").value = null
+    }
+  });
+</script>
 
 {% endblock %}
-

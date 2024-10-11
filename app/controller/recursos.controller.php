@@ -18,11 +18,7 @@ class RecursoController{
     }
 
     public function getAll(Request $req, Response $res, $args){
-        $idcategoria = $args['idcategoria'];
-        $datosEnviar = [
-            "idcategoria"       => $idcategoria
-        ];
-        $pt = $this->recurso->getAll($datosEnviar);
+        $pt = $this->recurso->getAll();
         $res->getBody()->write(json_encode($pt));
         return $res->withHeader('Content-Type', 'application/json');
       }

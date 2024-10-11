@@ -222,7 +222,7 @@ $app->get('/transparenciawsrest/consulta/responsables/{idorden_trabajo}', [Usuar
 
 //variado
 $app->get('/transparenciawsrest/consulta/plantareas/data', [PlandetareasController::class, 'getAll']);
-$app->get('/transparenciawsrest/consulta/recursos/{idcategoria}', [RecursoController::class, 'getAll']);
+$app->get('/transparenciawsrest/consulta/recursos', [RecursoController::class, 'getAll']);
 $app->get('/transparenciawsrest/consulta/activos/{idcategoria}', [ActivoController::class, 'getAll']);
 $app->get('/transparenciawsrest/consulta/tprioridades/data', [TipoPrioridadController::class, 'getAll']);
 $app->get('/transparenciawsrest/consulta/estados/data', [EstadosController::class, 'getAll']);
