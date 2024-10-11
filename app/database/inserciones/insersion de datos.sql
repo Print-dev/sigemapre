@@ -106,8 +106,8 @@ VALUES
     (1, 1, 'Monitor 4K', 'MON123', NOW(), 'Monitor LG de 27 pulgadas', '{"resolucion":"3840x2160"}', 5),
     (2, 2, 'Teclado Mecánico', 'TEC123', NOW(), 'Teclado mecánico HP', '{"tipo":"mecánico", "conectividad":"inalámbrico"}', 5),
     (3, 4, 'Compresor Industrial', 'COMP123', NOW(), 'Compresor Caterpillar de 10HP', '{"potencia":"10HP"}', 2),
-    (4, 5, 'Camión de Carga Hyundai', 'CAM123', NOW(), 'Camión de carga pesada Hyundai', '{"capacidad":"10 toneladas"}', 2);    
-
+    (4, 5, 'Camión de Carga Hyundai', 'CAM123', NOW(), 'Camión de carga pesada Hyundai', '{"capacidad":"10 toneladas"}', 2),
+	(1, 2, 'L3110', 'IMP123', NOW(), 'Impresora HP L3110', '{"capacidad":"200 kilogramos"}', 5);    
 
 INSERT INTO tipo_prioridades (tipo_prioridad) values ('baja'),('media'),('alta'),('urgente');
 
@@ -205,3 +205,10 @@ INSERT INTO tipo_diagnosticos (tipo_diagnostico) VALUES ('entrada'), ('salida');
 
 -- AQUI EMPIEZA LAS INSERCIONES PARA HACER LOS DETALLES DE UNA ORDEN DE TRABAJO CAUNO SE EJECUTEN 
 -- ME QUEDE ACA.
+select * from tipo_prioridades;
+select * from estados;
+select * from activos_vinculados_tarea;
+INSERT INTO plandetareas (descripcion) values ('mantenimiento de impresora');
+INSERT INTO tareas (idplantarea, idtipo_prioridad, descripcion, fecha_inicio, fecha_vencimiento, cant_intervalo, frecuencia, idestado) values (1, 3, 'llenado de tinta color rojo','11-10-2024','15-10-2024', 1, 'mensual', 1);
+INSERT INTO activos_vinculados_tarea (idtarea, idactivo) values (1, 5);
+select * from tareas;
